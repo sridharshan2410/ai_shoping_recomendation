@@ -1,0 +1,181 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+/* Header */
+
+header {
+    background: white;
+    padding: 20px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+nav a {
+    text-decoration: none;
+    margin-left: 25px;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Hero */
+
+.hero {
+    text-align: center;
+    padding: 70px 20px;
+    background: #eef4ff;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+/* Main button */
+
+.find-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.find-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Location */
+
+#location {
+    text-align: center;
+    margin: 20px;
+    font-size: 15px;
+}
+
+/* Sections */
+
+section {
+    padding: 50px 8%;
+}
+
+section h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+section p {
+    color: #6b7280;
+}
+
+/* Store container */
+
+#result {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+/* Store Card */
+
+.store-card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.store-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.store-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.store-card h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.store-address {
+    color: #6b7280;
+    margin-bottom: 18px;
+}
+
+.store-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.rating {
+    font-weight: bold;
+}
+
+.distance {
+    font-weight: bold;
+}
+
+/* View Location button */
+
+.view-location-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.view-location-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+/* Empty state */
+
+.empty-state {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}

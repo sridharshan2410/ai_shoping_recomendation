@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ShopNearby AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+
+        <div class="logo">
+            🛍️ <span>ShopNearby</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Nearby Stores</a>
+            <a href="#">Recommendations</a>
+        </div>
+
+        <button class="profile-btn">
+            👤
+        </button>
+
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <span class="badge">
+                ✨ AI Powered Shopping
+            </span>
+
+            <h1>
+                Find the Best Stores<br>
+                <span>Near You</span>
+            </h1>
+
+            <p>
+                Discover nearby stores, check product availability
+                and get intelligent shopping recommendations.
+            </p>
+
+            <button class="location-btn" onclick="findNearbyStores()">
+                📍 Find Stores Near Me
+            </button>
+
+            <div id="location"></div>
+
+        </div>
+
+
+        <div class="hero-card">
+
+            <div class="map-icon">
+                📍
+            </div>
+
+            <h3>Smart Location Search</h3>
+
+            <p>
+                We use your current location to find
+                the nearest shopping stores.
+            </p>
+
+            <div class="mini-stats">
+
+                <div>
+                    <strong>20 KM</strong>
+                    <span>Search Radius</span>
+                </div>
+
+                <div>
+                    <strong>AI</strong>
+                    <span>Recommendations</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Nearby Stores Section -->
+    <section class="stores-section">
+
+        <div class="section-header">
+
+            <div>
+                <span class="section-label">
+                    DISCOVER
+                </span>
+
+                <h2>Nearby Stores</h2>
+
+                <p>
+                    Stores available around your current location
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- Store Results -->
+        <div id="result" class="store-grid">
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📍
+                </div>
+
+                <h3>Find Stores Near You</h3>
+
+                <p>
+                    Click the button above to discover
+                    nearby shopping stores.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Features -->
+    <section class="features">
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📍
+            </div>
+
+            <h3>Nearby Stores</h3>
+
+            <p>
+                Find stores based on your current GPS location.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                ⭐
+            </div>
+
+            <h3>Store Ratings</h3>
+
+            <p>
+                Compare nearby stores using customer ratings.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🤖
+            </div>
+
+            <h3>AI Recommendations</h3>
+
+            <p>
+                Get personalized shopping recommendations.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+
+        <div class="logo">
+            🛍️ ShopNearby AI
+        </div>
+
+        <p>
+            Smart shopping powered by AI & real-time location.
+        </p>
+
+        <span>
+            © 2026 ShopNearby AI
+        </span>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
