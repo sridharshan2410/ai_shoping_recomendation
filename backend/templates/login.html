@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ShopNearby AI - Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 900px;
+            max-width: 95%;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .logo-section h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .logo-section p {
+            color: #777;
+            font-size: 16px;
+        }
+
+        .login-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .login-card {
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .customer-card {
+            border-color: #667eea;
+        }
+
+        .vendor-card {
+            border-color: #764ba2;
+        }
+
+        .card-icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        .login-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-card p {
+            color: #777;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .customer-btn {
+            background: #667eea;
+        }
+
+        .customer-btn:hover {
+            background: #5568d8;
+        }
+
+        .vendor-btn {
+            background: #764ba2;
+        }
+
+        .vendor-btn:hover {
+            background: #653b8f;
+        }
+
+        .register-link {
+            display: block;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .customer-link {
+            color: #667eea;
+        }
+
+        .vendor-link {
+            color: #764ba2;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+            .login-options {
+                grid-template-columns: 1fr;
+            }
+
+            .login-container {
+                padding: 25px;
+            }
+
+            .logo-section h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <!-- Logo -->
+        <div class="logo-section">
+            <div class="logo">🛍️</div>
+
+            <h1>ShopNearby AI</h1>
+
+            <p>
+                AI-Powered Nearby Shopping & Inventory Recommendation
+            </p>
+        </div>
+
+
+        <!-- Customer / Vendor -->
+        <div class="login-options">
+
+            <!-- Customer -->
+            <div class="login-card customer-card">
+
+                <div class="card-icon">
+                    👤
+                </div>
+
+                <h2>Customer</h2>
+
+                <p>
+                    Find nearby stores, search products,
+                    check stock and get AI recommendations.
+                </p>
+
+                <button
+                    class="login-btn customer-btn"
+                    onclick="window.location.href='/customer-login'">
+                    🔐 Customer Login
+                </button>
+
+                <a
+                    href="/customer-register"
+                    class="register-link customer-link">
+                    New Customer? Register
+                </a>
+
+            </div>
+
+
+            <!-- Vendor -->
+            <div class="login-card vendor-card">
+
+                <div class="card-icon">
+                    🏪
+                </div>
+
+                <h2>Vendor / Shop Owner</h2>
+
+                <p>
+                    Manage your shop, products, inventory,
+                    stock quantity and prices.
+                </p>
+
+                <button
+                    class="login-btn vendor-btn"
+                    onclick="window.location.href='/vendor-login'">
+                    🔐 Vendor Login
+                </button>
+
+                <a
+                    href="/vendor-register"
+                    class="register-link vendor-link">
+                    New Vendor? Register
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-text">
+            © 2026 ShopNearby AI | Smart Shopping Recommendation System
+        </div>
+
+    </div>
+
+</body>
+</html>

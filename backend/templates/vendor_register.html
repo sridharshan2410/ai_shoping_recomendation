@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vendor Registration - ShopNearby AI</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+
+            background: linear-gradient(135deg, #764ba2, #667eea);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 30px 0;
+        }
+
+        .register-box {
+            width: 500px;
+            max-width: 92%;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #764ba2;
+
+            margin-top: 20px;
+            margin-bottom: 15px;
+
+            padding-bottom: 8px;
+
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #444;
+
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #764ba2;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .location-row {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+        }
+
+        .location-btn {
+            width: 100%;
+
+            padding: 11px;
+
+            margin-bottom: 15px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #eee;
+
+            color: #444;
+
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+        .location-btn:hover {
+            background: #ddd;
+        }
+
+        .register-btn {
+            width: 100%;
+
+            padding: 14px;
+
+            margin-top: 10px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #764ba2;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #653b8f;
+        }
+
+        .login-link {
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #666;
+        }
+
+        .login-link a {
+            color: #764ba2;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+        .back {
+            text-align: center;
+
+            margin-top: 15px;
+        }
+
+        .back a {
+            color: #666;
+
+            text-decoration: none;
+        }
+
+        #message {
+            text-align: center;
+
+            margin-bottom: 15px;
+
+            font-size: 14px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        @media (max-width: 550px) {
+
+            .location-row {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="register-box">
+
+    <div class="logo">
+        🏪
+    </div>
+
+
+    <h1>Vendor Registration</h1>
+
+
+    <p class="subtitle">
+        Create your shop account on ShopNearby AI
+    </p>
+
+
+    <div id="message"></div>
+
+
+    <form onsubmit="vendorRegister(event)">
+
+
+        <!-- ========================= -->
+        <!-- OWNER INFORMATION -->
+        <!-- ========================= -->
+
+        <div class="section-title">
+            👤 Owner Information
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="ownerName">
+                Owner Name
+            </label>
+
+            <input
+                type="text"
+                id="ownerName"
+                placeholder="Enter owner name"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="email">
+                Email
+            </label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter email"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="phone">
+                Phone Number
+            </label>
+
+            <input
+                type="tel"
+                id="phone"
+                placeholder="Enter phone number"
+                maxlength="15"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="password">
+                Password
+            </label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Create password"
+                minlength="6"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="confirmPassword">
+                Confirm Password
+            </label>
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm password"
+                minlength="6"
+                required
+            >
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- SHOP INFORMATION -->
+        <!-- ========================= -->
+
+        <div class="section-title">
+            🏪 Shop Information
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="shopName">
+                Shop Name
+            </label>
+
+            <input
+                type="text"
+                id="shopName"
+                placeholder="Enter shop name"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="address">
+                Shop Address
+            </label>
+
+            <textarea
+                id="address"
+                placeholder="Enter complete shop address"
+                required
+            ></textarea>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- LOCATION -->
+        <!-- ========================= -->
+
+        <div class="section-title">
+            📍 Shop Location
+        </div>
+
+
+        <button
+            type="button"
+            class="location-btn"
+            onclick="getShopLocation()">
+
+            📍 Get Current Shop Location
+
+        </button>
+
+
+        <div class="location-row">
+
+
+            <div class="form-group">
+
+                <label for="latitude">
+                    Latitude
+                </label>
+
+                <input
+                    type="number"
+                    id="latitude"
+                    step="any"
+                    placeholder="e.g. 11.0168"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="longitude">
+                    Longitude
+                </label>
+
+                <input
+                    type="number"
+                    id="longitude"
+                    step="any"
+                    placeholder="e.g. 76.9558"
+                    required
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="register-btn">
+
+            🏪 Create Vendor Account
+
+        </button>
+
+
+    </form>
+
+
+    <div class="login-link">
+
+        Already have a vendor account?
+
+        <a href="/vendor-login">
+            Vendor Login
+        </a>
+
+    </div>
+
+
+    <div class="back">
+
+        <a href="/">
+            ← Back to Login Selection
+        </a>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+// ========================================
+// GET SHOP LOCATION
+// ========================================
+
+function getShopLocation() {
+
+    if (!navigator.geolocation) {
+
+        alert(
+            "❌ Geolocation is not supported by your browser."
+        );
+
+        return;
+    }
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            const latitude =
+                position.coords.latitude;
+
+            const longitude =
+                position.coords.longitude;
+
+
+            document.getElementById("latitude").value =
+                latitude.toFixed(6);
+
+
+            document.getElementById("longitude").value =
+                longitude.toFixed(6);
+
+
+            alert(
+                "✅ Shop location detected successfully!"
+            );
+
+        },
+
+
+        function(error) {
+
+            console.error(error);
+
+
+            alert(
+                "❌ Unable to get location. Please enter latitude and longitude manually."
+            );
+
+        }
+
+    );
+
+}
+
+
+
+// ========================================
+// VENDOR REGISTRATION
+// ========================================
+
+async function vendorRegister(event) {
+
+    event.preventDefault();
+
+
+    const ownerName =
+        document
+        .getElementById("ownerName")
+        .value
+        .trim();
+
+
+    const email =
+        document
+        .getElementById("email")
+        .value
+        .trim();
+
+
+    const phone =
+        document
+        .getElementById("phone")
+        .value
+        .trim();
+
+
+    const password =
+        document
+        .getElementById("password")
+        .value;
+
+
+    const confirmPassword =
+        document
+        .getElementById("confirmPassword")
+        .value;
+
+
+    const shopName =
+        document
+        .getElementById("shopName")
+        .value
+        .trim();
+
+
+    const address =
+        document
+        .getElementById("address")
+        .value
+        .trim();
+
+
+    const latitude =
+        document
+        .getElementById("latitude")
+        .value;
+
+
+    const longitude =
+        document
+        .getElementById("longitude")
+        .value;
+
+
+    const message =
+        document.getElementById("message");
+
+
+    message.innerHTML = "";
+
+
+
+    // ========================================
+    // PASSWORD CHECK
+    // ========================================
+
+    if (password !== confirmPassword) {
+
+        message.className = "error";
+
+        message.innerHTML =
+            "❌ Passwords do not match.";
+
+        return;
+    }
+
+
+
+    // ========================================
+    // LOCATION CHECK
+    // ========================================
+
+    if (!latitude || !longitude) {
+
+        message.className = "error";
+
+        message.innerHTML =
+            "❌ Please enter shop latitude and longitude.";
+
+        return;
+    }
+
+
+
+    try {
+
+
+        const response =
+            await fetch("/register-vendor", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    name: ownerName,
+
+                    email: email,
+
+                    phone: phone,
+
+                    password: password,
+
+                    role: "vendor",
+
+                    shop_name: shopName,
+
+                    address: address,
+
+                    latitude: latitude,
+
+                    longitude: longitude
+
+                })
+
+            });
+
+
+
+        const data =
+            await response.json();
+
+
+
+        if (response.ok) {
+
+            message.className = "success";
+
+            message.innerHTML =
+                "✅ Vendor registration successful!";
+
+
+            setTimeout(function() {
+
+                window.location.href =
+                    "/vendor-login";
+
+            }, 1200);
+
+        }
+
+        else {
+
+            message.className = "error";
+
+            message.innerHTML =
+                "❌ " +
+                (
+                    data.error ||
+                    "Registration failed."
+                );
+
+        }
+
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+
+        message.className = "error";
+
+        message.innerHTML =
+            "❌ Server connection error.";
+
+    }
+
+}
+
+</script>
+
+
+</body>
+
+</html>

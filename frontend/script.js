@@ -1,3 +1,7 @@
+// ==========================================
+// GET NEARBY STORES
+// ==========================================
+
 function findNearbyStores() {
 
     const locationText = document.getElementById("location");
@@ -18,6 +22,10 @@ function findNearbyStores() {
 }
 
 
+// ==========================================
+// GET USER LOCATION AND FIND STORES
+// ==========================================
+
 function getNearbyStores(position) {
 
     const latitude = position.coords.latitude;
@@ -25,6 +33,10 @@ function getNearbyStores(position) {
 
     const locationText = document.getElementById("location");
     const result = document.getElementById("result");
+
+    // Save user location
+    localStorage.setItem("userLat", latitude);
+    localStorage.setItem("userLon", longitude);
 
     locationText.innerHTML =
         `📍 Your location: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
@@ -65,6 +77,10 @@ function getNearbyStores(position) {
         });
 }
 
+
+// ==========================================
+// DISPLAY NEARBY STORES
+// ==========================================
 
 function displayStores(stores) {
 
@@ -116,12 +132,26 @@ function displayStores(stores) {
                 </span>
 
             </div>
+
+            <button
+                onclick="viewStoreLocation(
+                    ${store.latitude},
+                    ${store.longitude},
+                    '${store.store_name}'
+                )"
+            >
+                📍 View Location
+            </button>
         `;
 
         result.appendChild(card);
     });
 }
 
+
+// ==========================================
+// LOCATION ERROR
+// ==========================================
 
 function locationError(error) {
 
@@ -147,4 +177,41 @@ function locationError(error) {
         locationText.innerHTML =
             "❌ Unable to get your location.";
     }
+}
+
+
+// ==========================================
+// VIEW STORE LOCATION
+// Opens our own Leaflet GPS map
+// ==========================================
+
+function viewStoreLocation(latitude, longitude, storeName) {
+
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lon)) {
+
+        alert("❌ Store location not available");
+        return;
+    }
+
+    // Save selected store information
+    localStorage.setItem(
+        "selectedStoreLat",
+        lat
+    );
+
+    localStorage.setItem(
+        "selectedStoreLon",
+        lon
+    );
+
+    localStorage.setItem(
+        "selectedStoreName",
+        storeName
+    );
+
+    // Open our own map page
+    window.location.href = "/map";
 }

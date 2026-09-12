@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Store Location</title>
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .map-header {
+            padding: 20px;
+            background: white;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-header h2 {
+            margin: 0 0 8px;
+        }
+
+        #storeName {
+            color: #555;
+        }
+
+        #map {
+            width: 100%;
+            height: 80vh;
+        }
+
+        .back-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="map-header">
+
+        <h2>📍 Store Location</h2>
+
+        <p id="storeName">
+            Loading store...
+        </p>
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ← Back
+        </button>
+
+    </div>
+
+    <div id="map"></div>
+
+
+    <!-- Leaflet JS -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <script>
+
+        const latitude =
+            parseFloat(localStorage.getItem("selectedStoreLat"));
+
+        const longitude =
+            parseFloat(localStorage.getItem("selectedStoreLon"));
+
+        const storeName =
+            localStorage.getItem("selectedStoreName");
+
+
+        // Check location
+        if (
+            isNaN(latitude) ||
+            isNaN(longitude)
+        ) {
+
+            document.getElementById("storeName").innerHTML =
+                "❌ Store location not available";
+
+        } else {
+
+            document.getElementById("storeName").innerHTML =
+                storeName;
+
+
+            // Create map
+            const map = L.map("map").setView(
+                [latitude, longitude],
+                15
+            );
+
+
+            // OpenStreetMap tiles
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        "&copy; OpenStreetMap contributors"
+                }
+            ).addTo(map);
+
+
+            // Store marker
+            const marker = L.marker([
+                latitude,
+                longitude
+            ]).addTo(map);
+
+
+            marker.bindPopup(
+                `<b>🏪 ${storeName}</b><br>
+                 📍 ${latitude.toFixed(5)},
+                 ${longitude.toFixed(5)}`
+            ).openPopup();
+
+        }
+
+
+        function goBack() {
+
+            window.history.back();
+
+        }
+
+    </script>
+
+</body>
+</html>

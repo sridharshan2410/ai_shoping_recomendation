@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vendor Dashboard - ShopNearby AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #1e293b;
+            color: white;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .vendor-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            border: none;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* CONTAINER */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #1e293b;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        /* STORE INFO */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #64748b;
+        }
+
+        .rating {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        /* BUTTON */
+        .btn {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* FORM */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-actions {
+            margin-top: 20px;
+        }
+
+        /* TABLE */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #1e293b;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .stock-available {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .stock-low {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .stock-out {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* MESSAGE */
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .store-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+
+        <div class="logo">
+            🛒 ShopNearby AI
+        </div>
+
+        <div class="vendor-info">
+            <span>
+                Welcome, <strong id="vendorName">Vendor</strong>
+            </span>
+
+            <button class="logout-btn" onclick="logout()">
+                Logout
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+
+        <h1>Vendor Dashboard</h1>
+
+
+        <!-- MESSAGE -->
+        <div id="message" class="message"></div>
+
+
+        <!-- STORE INFORMATION -->
+        <div class="card">
+
+            <h2>🏪 My Store</h2>
+
+            <div class="store-grid">
+
+                <div class="info-box">
+                    <strong>Store Name</strong>
+                    <span id="storeName">Loading...</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Owner</strong>
+                    <span id="ownerName">Loading...</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Address</strong>
+                    <span id="storeAddress">Loading...</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Rating</strong>
+                    <span class="rating">
+                        ⭐ <span id="storeRating">0</span>
+                    </span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Latitude</strong>
+                    <span id="storeLatitude">Loading...</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Longitude</strong>
+                    <span id="storeLongitude">Loading...</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ADD PRODUCT -->
+        <div class="card">
+
+            <h2>➕ Add Product</h2>
+
+            <form id="addProductForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Product Name</label>
+
+                        <input
+                            type="text"
+                            id="productName"
+                            placeholder="Example: Rice"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Category</label>
+
+                        <input
+                            type="text"
+                            id="productCategory"
+                            placeholder="Example: Grocery"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Price</label>
+
+                        <input
+                            type="number"
+                            id="productPrice"
+                            placeholder="Example: 350"
+                            min="0"
+                            step="0.01"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Quantity</label>
+
+                        <input
+                            type="number"
+                            id="productQuantity"
+                            placeholder="Example: 10"
+                            min="0"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+                        Add Product
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- INVENTORY -->
+        <div class="card">
+
+            <h2>📦 My Inventory</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="inventoryTableBody">
+
+                        <tr>
+                            <td colspan="7" class="loading">
+                                Loading inventory...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- STORE RATING -->
+        <div class="card">
+
+            <h2>⭐ Store Rating</h2>
+
+            <p>
+                Current Store Rating:
+                <strong class="rating">
+                    ⭐ <span id="shopRating">0</span>
+                </strong>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* =========================================
+           SHOW MESSAGE
+        ========================================= */
+
+        function showMessage(message, type) {
+
+            const messageBox =
+                document.getElementById("message");
+
+            messageBox.textContent = message;
+
+            messageBox.className =
+                "message " + type;
+
+            setTimeout(() => {
+
+                messageBox.className = "message";
+
+            }, 4000);
+        }
+
+
+        /* =========================================
+           LOAD VENDOR INFORMATION
+        ========================================= */
+
+        async function loadVendorInfo() {
+
+            try {
+
+                const response =
+                    await fetch("/api/current-user", {
+                        credentials: "include"
+                    });
+
+                const data =
+                    await response.json();
+
+                console.log("CURRENT USER:", data);
+
+
+                /*
+                    Backend response:
+
+                    {
+                        success: true,
+                        user: {...}
+                    }
+
+                    So we MUST check data.success.
+                */
+
+                if (
+                    !response.ok ||
+                    !data.success ||
+                    !data.user
+                ) {
+
+                    window.location.href =
+                        "/vendor-login";
+
+                    return;
+                }
+
+
+                /* Check vendor role */
+
+                if (data.user.role !== "vendor") {
+
+                    window.location.href =
+                        "/customer-dashboard";
+
+                    return;
+                }
+
+
+                /* Display vendor name */
+
+                document.getElementById(
+                    "vendorName"
+                ).textContent = data.user.name;
+
+
+                document.getElementById(
+                    "ownerName"
+                ).textContent = data.user.name;
+
+
+                /* Load store */
+
+                await loadVendorStore();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Vendor information error:",
+                    error
+                );
+
+                window.location.href =
+                    "/vendor-login";
+            }
+        }
+
+
+        /* =========================================
+           LOAD VENDOR STORE
+        ========================================= */
+
+        async function loadVendorStore() {
+
+            try {
+
+                const response =
+                    await fetch("/api/vendor-store", {
+                        credentials: "include"
+                    });
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "VENDOR STORE:",
+                    data
+                );
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    console.error(
+                        "Store loading failed:",
+                        data.error
+                    );
+
+                    showMessage(
+                        data.error ||
+                        "Unable to load store information",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                /*
+                    Backend response:
+
+                    {
+                        success: true,
+                        store: {...}
+                    }
+
+                    Therefore use data.store.
+                */
+
+                const store =
+                    data.store;
+
+
+                if (!store) {
+
+                    showMessage(
+                        "No store found for this vendor.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                document.getElementById(
+                    "storeName"
+                ).textContent =
+                    store.store_name || "N/A";
+
+
+                document.getElementById(
+                    "ownerName"
+                ).textContent =
+                    store.owner_name || "N/A";
+
+
+                document.getElementById(
+                    "storeAddress"
+                ).textContent =
+                    store.address || "N/A";
+
+
+                document.getElementById(
+                    "storeRating"
+                ).textContent =
+                    store.rating ?? "0";
+
+
+                document.getElementById(
+                    "storeLatitude"
+                ).textContent =
+                    store.latitude ?? "N/A";
+
+
+                document.getElementById(
+                    "storeLongitude"
+                ).textContent =
+                    store.longitude ?? "N/A";
+
+
+                document.getElementById(
+                    "shopRating"
+                ).textContent =
+                    store.rating ?? "0";
+
+
+                /* Load inventory after store loaded */
+
+                await loadInventory();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Store loading error:",
+                    error
+                );
+
+                showMessage(
+                    "Error loading store information",
+                    "error"
+                );
+            }
+        }
+
+
+        /* =========================================
+           LOAD INVENTORY
+        ========================================= */
+
+        async function loadInventory() {
+
+            const tableBody =
+                document.getElementById(
+                    "inventoryTableBody"
+                );
+
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">
+                        Loading inventory...
+                    </td>
+                </tr>
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/vendor-inventory",
+                        {
+                            credentials: "include"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "VENDOR INVENTORY:",
+                    data
+                );
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7">
+                                Unable to load inventory.
+                            </td>
+                        </tr>
+                    `;
+
+                    console.error(
+                        "Inventory error:",
+                        data.error
+                    );
+
+                    return;
+                }
+
+
+                const products =
+                    data.inventory || [];
+
+
+                if (products.length === 0) {
+
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7">
+                                No products found in inventory.
+                            </td>
+                        </tr>
+                    `;
+
+                    return;
+                }
+
+
+                tableBody.innerHTML = "";
+
+
+                products.forEach(product => {
+
+                    let statusClass =
+                        "stock-available";
+
+                    let statusText =
+                        "Available";
+
+
+                    if (product.quantity === 0) {
+
+                        statusClass =
+                            "stock-out";
+
+                        statusText =
+                            "Out of Stock";
+
+                    }
+
+                    else if (product.quantity <= 5) {
+
+                        statusClass =
+                            "stock-low";
+
+                        statusText =
+                            "Low Stock";
+                    }
+
+
+                    const row =
+                        document.createElement("tr");
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${product.product_id}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                product.product_name
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                product.category || "N/A"
+                            )}
+                        </td>
+
+                        <td>
+                            ₹${Number(
+                                product.price
+                            ).toFixed(2)}
+                        </td>
+
+                        <td>
+                            ${product.quantity}
+                        </td>
+
+                        <td class="${statusClass}">
+                            ${statusText}
+                        </td>
+
+                        <td>
+
+                            <div class="action-buttons">
+
+                                <button
+                                    class="btn btn-primary"
+                                    onclick="updateProduct(
+                                        ${product.product_id},
+                                        '${escapeHTML(product.product_name)}',
+                                        ${product.quantity}
+                                    )"
+                                >
+                                    Update
+                                </button>
+
+                                <button
+                                    class="btn btn-danger"
+                                    onclick="deleteProduct(
+                                        ${product.product_id}
+                                    )"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </td>
+                    `;
+
+
+                    tableBody.appendChild(row);
+
+                });
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Inventory loading error:",
+                    error
+                );
+
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            Error loading inventory.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+
+        /* =========================================
+           ADD PRODUCT
+        ========================================= */
+
+        document
+            .getElementById("addProductForm")
+            .addEventListener(
+                "submit",
+                async function(event) {
+
+                    event.preventDefault();
+
+
+                    const productName =
+                        document.getElementById(
+                            "productName"
+                        ).value.trim();
+
+
+                    const category =
+                        document.getElementById(
+                            "productCategory"
+                        ).value.trim();
+
+
+                    const price =
+                        document.getElementById(
+                            "productPrice"
+                        ).value;
+
+
+                    const quantity =
+                        document.getElementById(
+                            "productQuantity"
+                        ).value;
+
+
+                    if (
+                        !productName ||
+                        !category ||
+                        price === "" ||
+                        quantity === ""
+                    ) {
+
+                        showMessage(
+                            "Please fill all fields.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/api/vendor/add-product",
+                                {
+                                    method: "POST",
+
+                                    credentials: "include",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body: JSON.stringify({
+
+                                        product_name:
+                                            productName,
+
+                                        category:
+                                            category,
+
+                                        price:
+                                            parseFloat(price),
+
+                                        quantity:
+                                            parseInt(quantity)
+
+                                    })
+                                }
+                            );
+
+
+                        const data =
+                            await response.json();
+
+
+                        console.log(
+                            "ADD PRODUCT:",
+                            data
+                        );
+
+
+                        if (
+                            !response.ok ||
+                            !data.success
+                        ) {
+
+                            showMessage(
+                                data.error ||
+                                "Failed to add product.",
+                                "error"
+                            );
+
+                            return;
+                        }
+
+
+                        showMessage(
+                            "✅ Product added successfully!",
+                            "success"
+                        );
+
+
+                        /* Clear form */
+
+                        document
+                            .getElementById(
+                                "addProductForm"
+                            )
+                            .reset();
+
+
+                        /* Reload inventory */
+
+                        await loadInventory();
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Add product error:",
+                            error
+                        );
+
+                        showMessage(
+                            "Error adding product.",
+                            "error"
+                        );
+                    }
+
+                }
+            );
+
+
+        /* =========================================
+           UPDATE PRODUCT
+        ========================================= */
+
+async function updateProduct(
+    productId,
+    productName,
+    currentQuantity,
+    currentPrice
+) {
+
+    const newQuantity = prompt(
+        "Enter new quantity for " + productName + ":",
+        currentQuantity
+    );
+
+    if (newQuantity === null) {
+        return;
+    }
+
+    if (
+        newQuantity === "" ||
+        isNaN(newQuantity) ||
+        Number(newQuantity) < 0
+    ) {
+        showMessage(
+            "Please enter a valid quantity.",
+            "error"
+        );
+        return;
+    }
+
+
+    const newPrice = prompt(
+        "Enter new price for " + productName + ":",
+        currentPrice
+    );
+
+    if (newPrice === null) {
+        return;
+    }
+
+    if (
+        newPrice === "" ||
+        isNaN(newPrice) ||
+        Number(newPrice) < 0
+    ) {
+        showMessage(
+            "Please enter a valid price.",
+            "error"
+        );
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "/api/vendor/update-product",
+            {
+                method: "PUT",
+
+                credentials: "include",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    product_id: productId,
+
+                    quantity: parseInt(newQuantity),
+
+                    price: parseFloat(newPrice)
+
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+        console.log("UPDATE PRODUCT:", data);
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            showMessage(
+                data.error ||
+                "Failed to update product.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        showMessage(
+            "✅ Product updated successfully!",
+            "success"
+        );
+
+
+        await loadInventory();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Update product error:",
+            error
+        );
+
+        showMessage(
+            "Error updating product.",
+            "error"
+        );
+    }
+}
+
+
+        /* =========================================
+           DELETE PRODUCT
+        ========================================= */
+
+        async function deleteProduct(
+            productId
+        ) {
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to delete this product?"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/vendor/delete-product/" +
+                        productId,
+                        {
+                            method: "DELETE",
+
+                            credentials: "include"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "DELETE PRODUCT:",
+                    data
+                );
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    showMessage(
+                        data.error ||
+                        "Failed to delete product.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                showMessage(
+                    "✅ Product deleted successfully!",
+                    "success"
+                );
+
+
+                await loadInventory();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Delete product error:",
+                    error
+                );
+
+                showMessage(
+                    "Error deleting product.",
+                    "error"
+                );
+            }
+        }
+
+
+        /* =========================================
+           ESCAPE HTML
+        ========================================= */
+
+        function escapeHTML(value) {
+
+            if (value === null ||
+                value === undefined) {
+
+                return "";
+            }
+
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        /* =========================================
+           LOGOUT
+        ========================================= */
+
+        async function logout() {
+
+            try {
+
+                await fetch(
+                    "/logout",
+                    {
+                        method: "POST",
+                        credentials: "include"
+                    }
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+            }
+
+
+            window.location.href =
+                "/vendor-login";
+        }
+
+
+        /* =========================================
+           PAGE LOAD
+        ========================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                console.log(
+                    "Vendor Dashboard Loaded"
+                );
+
+                loadVendorInfo();
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

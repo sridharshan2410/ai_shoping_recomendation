@@ -2,141 +2,135 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>ShopNearby AI</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+          <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
 </head>
 
 <body>
 
-    <!-- Navigation -->
-    <nav class="navbar">
+    <!-- Header -->
 
-        <div class="logo">
-            🛍️ <span>ShopNearby AI</span>
-        </div>
+    <header>
 
-        <div class="nav-links">
-            <a href="#">Home</a>
-            <a href="#stores">Nearby Stores</a>
-            <a href="#features">Features</a>
-        </div>
+    <div class="logo">
+        🛍️ ShopNearby AI
+    </div>
+    <nav>
 
-        <button class="profile-btn">
-            👤
+    <a href="#">Home</a>
+
+    <a href="#nearby">
+        Nearby Stores
+    </a>
+
+    <a href="#products">
+        Products
+    </a>
+
+    <span id="authButtons">
+
+        <button
+            class="nav-auth-btn"
+            onclick="showLogin()">
+            Login
         </button>
 
-    </nav>
+        <button
+            class="nav-auth-btn"
+            onclick="showRegister()">
+            Register
+        </button>
+
+    </span>
+
+    <span id="userSection"></span>
+
+</nav>
+</header>
 
 
-    <!-- Hero Section -->
+    <!-- Hero -->
+
     <section class="hero">
 
-        <div class="hero-content">
+        <h1>
+            Find Stores & Products Near You
+        </h1>
 
-            <span class="badge">
-                ✨ AI Powered Shopping
-            </span>
+        <p>
+            Discover nearby stores and check real-time product availability.
+        </p>
 
-            <h1>
-                Find the Best Stores
-                <span>Near You</span>
-            </h1>
+        <button
+            class="find-btn"
+            onclick="findNearbyStores()">
 
-            <p>
-                Discover nearby shopping stores using your
-                current location and get smart shopping
-                recommendations.
-            </p>
+            📍 Find Stores Near Me
 
-            <button class="location-btn"
-                    onclick="findNearbyStores()">
+        </button>
 
-                📍 Find Stores Near Me
-
-            </button>
-
-            <div id="location"></div>
-
-        </div>
-
-
-        <!-- Hero Card -->
-        <div class="hero-card">
-
-            <div class="map-icon">
-                📍
-            </div>
-
-            <h3>
-                Smart Location Search
-            </h3>
-
-            <p>
-                Find shopping stores around your
-                current GPS location.
-            </p>
-
-            <div class="mini-stats">
-
-                <div>
-                    <strong>20 KM</strong>
-                    <span>Search Radius</span>
-                </div>
-
-                <div>
-                    <strong>AI</strong>
-                    <span>Smart Search</span>
-                </div>
-
-            </div>
-
-        </div>
+        <div id="location"></div>
 
     </section>
 
 
-    <!-- Nearby Stores -->
-    <section class="stores-section" id="stores">
+    <!-- Product Search -->
 
-        <div class="section-header">
+    <section id="products">
 
-            <span class="section-label">
-                DISCOVER
-            </span>
+        <div class="section-title">
 
             <h2>
-                Nearby Stores
+                🔍 Search Products
             </h2>
 
             <p>
-                Find stores available around your current location.
+                Find products available in nearby stores.
             </p>
 
         </div>
 
 
-        <!-- Store Results -->
+       <input
+    type="text"
+    id="productInput"
+    placeholder="Search product... e.g. Rice, Milk, Soap"
+>
 
-        <div id="result" class="store-grid">
+<button onclick="searchProduct()">
+    🔍 Search
+</button>
+
+<div id="productResults"></div>
+
+
+        <div id="productResult">
 
             <div class="empty-state">
 
                 <div class="empty-icon">
-                    📍
+                    🛒
                 </div>
 
                 <h3>
-                    Find Stores Near You
+                    Search for a Product
                 </h3>
 
                 <p>
-                    Click "Find Stores Near Me" to discover
-                    nearby shopping stores.
+                    Enter a product name to check its availability.
                 </p>
 
             </div>
@@ -145,84 +139,184 @@
 
     </section>
 
+    <!-- AI Recommendation -->
 
-    <!-- Features -->
-    <section class="features" id="features">
+<section id="recommendation">
 
-        <div class="feature-card">
+    <div class="section-title">
 
-            <div class="feature-icon">
-                📍
-            </div>
+        <h2>🤖 AI Shopping Recommendation</h2>
 
-            <h3>
-                Nearby Stores
-            </h3>
+        <p>
+            Find the best store based on price, distance, rating and stock.
+        </p>
 
-            <p>
-                Find stores based on your current GPS location.
-            </p>
+    </div>
 
-        </div>
+    <div id="recommendationResult">
 
+        <div class="empty-state">
 
-        <div class="feature-card">
-
-            <div class="feature-icon">
-                ⭐
-            </div>
-
-            <h3>
-                Store Ratings
-            </h3>
-
-            <p>
-                Compare nearby stores using ratings.
-            </p>
-
-        </div>
-
-
-        <div class="feature-card">
-
-            <div class="feature-icon">
+            <div class="empty-icon">
                 🤖
             </div>
 
             <h3>
-                AI Recommendations
+                Smart Recommendation
             </h3>
 
             <p>
-                Get intelligent shopping recommendations.
+                Search for a product to get the best store recommendation.
             </p>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
 
 
-    <!-- Footer -->
-    <footer>
+    <!-- Nearby Stores -->
 
-        <div class="logo">
-            🛍️ ShopNearby AI
+    <section id="nearby">
+
+        <div class="section-title">
+
+            <h2>
+                🏪 Nearby Stores
+            </h2>
+
+            <p>
+                Find stores around your current location.
+            </p>
+
         </div>
 
+        <div id="result"></div>
+
+    </section>
+    <section id="map-section">
+
+    <div class="section-title">
+
+        <h2>📍 Store Location</h2>
+
         <p>
-            Smart shopping powered by AI and real-time location.
+            View your location and selected store on the map.
         </p>
 
-        <span>
-            © 2026 ShopNearby AI
-        </span>
+    </div>
+
+    <div id="map"></div>
+
+</section>
+<!-- Login Modal -->
+
+<div id="loginModal" class="auth-modal">
+
+    <div class="auth-box">
+
+        <span class="close-btn" onclick="closeAuth()">×</span>
+
+        <h2>🔐 User Login</h2>
+
+        <p>Login to ShopNearby AI</p>
+
+        <input
+            type="email"
+            id="loginEmail"
+            placeholder="Enter your email"
+        >
+
+        <input
+            type="password"
+            id="loginPassword"
+            placeholder="Enter your password"
+        >
+
+        <button onclick="loginUser()">
+            Login
+        </button>
+
+        <p id="loginMessage"></p>
+
+        <p>
+            Don't have an account?
+            <a href="#" onclick="showRegister()">Register</a>
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- Register Modal -->
+
+<div id="registerModal" class="auth-modal">
+
+    <div class="auth-box">
+
+        <span class="close-btn" onclick="closeAuth()">×</span>
+
+        <h2>📝 Create Account</h2>
+
+        <p>Register for ShopNearby AI</p>
+
+        <input
+            type="text"
+            id="registerName"
+            placeholder="Enter your name"
+        >
+
+        <input
+            type="email"
+            id="registerEmail"
+            placeholder="Enter your email"
+        >
+
+        <input
+            type="text"
+            id="registerPhone"
+            placeholder="Enter your phone number"
+        >
+
+        <input
+            type="password"
+            id="registerPassword"
+            placeholder="Create password"
+        >
+
+        <button onclick="registerUser()">
+            Register
+        </button>
+
+        <p id="registerMessage"></p>
+
+        <p>
+            Already have an account?
+            <a href="#" onclick="showLogin()">Login</a>
+        </p>
+
+    </div>
+
+</div>
+    <!-- Footer -->
+
+    <footer>
+
+        🛍️ ShopNearby AI
+
+        <p>
+            AI Powered Shopping Recommendation System
+        </p>
 
     </footer>
 
+    <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
-    <!-- JavaScript -->
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 
