@@ -399,3 +399,541 @@ footer span {
         grid-template-columns: 1fr;
     }
 }
+/* ================================
+   DASHBOARD UI SIZE IMPROVEMENT
+================================ */
+
+main,
+.dashboard-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    box-sizing: border-box;
+}
+
+/* Section headings */
+section {
+    margin-bottom: 40px;
+}
+
+/* Search section */
+#productResults,
+#productResult {
+    width: 100%;
+    max-width: 850px;
+    margin: 20px auto;
+}
+
+/* Product cards */
+.product-card {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+/* AI Recommendation section */
+#recommendationResult {
+    width: 100%;
+    max-width: 900px;
+    margin: 25px auto;
+}
+
+/* Recommendation card */
+.recommendation-card {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 28px;
+    border-radius: 18px;
+    margin-bottom: 25px;
+}
+
+/* Rating section */
+#store-rating-section {
+    width: 100%;
+    max-width: 850px;
+    margin: 40px auto;
+    box-sizing: border-box;
+    padding: 30px;
+}
+
+/* Search input */
+#productInput {
+    width: 70%;
+    max-width: 600px;
+    min-width: 300px;
+    padding: 13px 16px;
+    font-size: 16px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+/* Search button */
+button {
+    font-size: 14px;
+}
+
+/* Recommendation buttons */
+.recommendation-card button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Better spacing */
+.recommendation-card h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.recommendation-card p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* AI score */
+.ai-score {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+
+    main,
+    .dashboard-container {
+        padding: 20px 12px;
+    }
+
+    #productInput {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 10px;
+    }
+
+    #productResults,
+    #productResult,
+    #recommendationResult,
+    #store-rating-section {
+        width: 100%;
+    }
+
+    .product-card,
+    .recommendation-card {
+        padding: 20px;
+    }
+}
+
+/* =====================================================
+   TOP 3 AI RECOMMENDATION - PREMIUM UI
+===================================================== */
+
+/* Main recommendation area */
+#recommendationResult {
+    width: 100%;
+    max-width: 950px;
+    margin: 30px auto;
+}
+
+
+/* =====================================================
+   TOP RECOMMENDATION HEADER
+===================================================== */
+
+.top-recommendation-header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 25px 20px;
+    border-radius: 20px;
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #eef2ff
+    );
+    border: 1px solid #dbeafe;
+}
+
+.top-recommendation-header .recommendation-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 30px;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 10px;
+}
+
+.top-recommendation-header h2 {
+    margin: 5px 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.top-recommendation-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   RECOMMENDATION CARD
+===================================================== */
+
+.recommendation-card {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 28px;
+    margin-bottom: 28px;
+    border-radius: 22px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.08);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =====================================================
+   RANK
+===================================================== */
+
+.recommendation-rank {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    margin-bottom: 14px;
+    border-radius: 30px;
+    background: #f3f4f6;
+    color: #111827;
+    font-size: 18px;
+}
+
+.recommendation-rank strong {
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   AI BADGE
+===================================================== */
+
+.recommendation-card .recommendation-badge {
+    display: inline-block;
+    padding: 7px 13px;
+    margin-bottom: 18px;
+    border-radius: 20px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   STORE HEADER
+===================================================== */
+
+.recommendation-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.recommendation-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 15px;
+    background: #eff6ff;
+    font-size: 27px;
+}
+
+.recommendation-header h3 {
+    margin: 0 0 5px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.recommendation-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   PRODUCT INFORMATION
+===================================================== */
+
+.recommendation-product {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 15px;
+    background: #f9fafb;
+}
+
+.recommendation-product h4 {
+    margin: 0 0 15px;
+    font-size: 18px;
+    color: #111827;
+}
+
+.recommendation-details {
+    display: grid;
+    grid-template-columns:
+        repeat(4, 1fr);
+    gap: 10px;
+}
+
+.recommendation-details span {
+    padding: 11px 10px;
+    border-radius: 10px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+
+/* =====================================================
+   AI SCORE
+===================================================== */
+
+.ai-score {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: 15px;
+    background: linear-gradient(
+        135deg,
+        #eef2ff,
+        #eff6ff
+    );
+    border: 1px solid #dbeafe;
+}
+
+.ai-score span {
+    font-size: 15px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.ai-score strong {
+    font-size: 28px;
+    font-weight: 800;
+    color: #2563eb;
+}
+
+
+/* =====================================================
+   SCORE ANALYSIS
+===================================================== */
+
+.recommendation-analysis {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+.recommendation-analysis h4 {
+    margin: 0 0 18px;
+    font-size: 17px;
+    color: #111827;
+}
+
+.analysis-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.analysis-row:last-child {
+    border-bottom: none;
+}
+
+.analysis-row span {
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.analysis-row small {
+    color: #9ca3af;
+}
+
+.analysis-row strong {
+    font-size: 14px;
+    color: #2563eb;
+}
+
+
+/* =====================================================
+   WHY THIS STORE
+===================================================== */
+
+.recommendation-reason {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+.recommendation-reason h4 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    color: #111827;
+}
+
+.recommendation-reason ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendation-reason li {
+    padding: 9px 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.recommendation-card .view-location-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 11px;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.recommendation-card .view-location-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   TOP RANK DIFFERENTIATION
+===================================================== */
+
+.recommendation-card:first-of-type {
+    border: 2px solid #2563eb;
+}
+
+
+/* =====================================================
+   MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    #recommendationResult {
+        width: 100%;
+        margin: 20px auto;
+    }
+
+    .top-recommendation-header {
+        padding: 20px 15px;
+    }
+
+    .top-recommendation-header h2 {
+        font-size: 23px;
+    }
+
+    .recommendation-card {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .recommendation-header {
+        align-items: flex-start;
+    }
+
+    .recommendation-header h3 {
+        font-size: 19px;
+    }
+
+    .recommendation-details {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .ai-score strong {
+        font-size: 23px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .recommendation-card {
+        padding: 16px;
+    }
+
+    .recommendation-details {
+        grid-template-columns: 1fr;
+    }
+
+    .recommendation-header {
+        gap: 10px;
+    }
+
+    .recommendation-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+
+    .recommendation-header h3 {
+        font-size: 17px;
+    }
+
+    .ai-score {
+        padding: 15px;
+    }
+
+    .ai-score strong {
+        font-size: 21px;
+    }
+}

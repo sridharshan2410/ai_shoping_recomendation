@@ -12,10 +12,11 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
-          <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 
 </head>
 
@@ -25,41 +26,49 @@
 
     <header>
 
-    <div class="logo">
-        🛍️ ShopNearby AI
-    </div>
-    <nav>
+        <div class="logo">
+            🛍️ ShopNearby AI
+        </div>
 
-    <a href="#">Home</a>
+        <nav>
 
-    <a href="#nearby">
-        Nearby Stores
-    </a>
+            <a href="#">
+                Home
+            </a>
 
-    <a href="#products">
-        Products
-    </a>
+            <a href="#nearby">
+                Nearby Stores
+            </a>
 
-    <span id="authButtons">
+            <a href="#products">
+                Products
+            </a>
 
-        <button
-            class="nav-auth-btn"
-            onclick="showLogin()">
-            Login
-        </button>
+            <span id="authButtons">
 
-        <button
-            class="nav-auth-btn"
-            onclick="showRegister()">
-            Register
-        </button>
+                <button
+                    class="nav-auth-btn"
+                    onclick="showLogin()">
 
-    </span>
+                    Login
 
-    <span id="userSection"></span>
+                </button>
 
-</nav>
-</header>
+                <button
+                    class="nav-auth-btn"
+                    onclick="showRegister()">
+
+                    Register
+
+                </button>
+
+            </span>
+
+            <span id="userSection"></span>
+
+        </nav>
+
+    </header>
 
 
     <!-- Hero -->
@@ -71,7 +80,8 @@
         </h1>
 
         <p>
-            Discover nearby stores and check real-time product availability.
+            Discover nearby stores and check real-time
+            product availability.
         </p>
 
         <button
@@ -104,17 +114,20 @@
         </div>
 
 
-       <input
-    type="text"
-    id="productInput"
-    placeholder="Search product... e.g. Rice, Milk, Soap"
->
+        <input
+            type="text"
+            id="productInput"
+            placeholder="Search product... e.g. Rice, Milk, Soap"
+        >
 
-<button onclick="searchProduct()">
-    🔍 Search
-</button>
+        <button onclick="searchProduct()">
 
-<div id="productResults"></div>
+            🔍 Search
+
+        </button>
+
+
+        <div id="productResults"></div>
 
 
         <div id="productResult">
@@ -139,41 +152,190 @@
 
     </section>
 
+
     <!-- AI Recommendation -->
 
-<section id="recommendation">
+    <section id="recommendation">
 
-    <div class="section-title">
+        <div class="section-title">
 
-        <h2>🤖 AI Shopping Recommendation</h2>
-
-        <p>
-            Find the best store based on price, distance, rating and stock.
-        </p>
-
-    </div>
-
-    <div id="recommendationResult">
-
-        <div class="empty-state">
-
-            <div class="empty-icon">
-                🤖
-            </div>
-
-            <h3>
-                Smart Recommendation
-            </h3>
+            <h2>
+                🤖 AI Shopping Recommendation
+            </h2>
 
             <p>
-                Search for a product to get the best store recommendation.
+                Find the best store based on price,
+                distance, rating and stock.
             </p>
 
         </div>
 
-    </div>
 
-</section>
+        <div id="recommendationResult">
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    🤖
+                </div>
+
+                <h3>
+                    Smart Recommendation
+                </h3>
+
+                <p>
+                    Search for a product to get the
+                    best store recommendation.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STORE RATING -->
+
+    <section id="store-rating-section">
+
+        <div class="section-title">
+
+            <h2>
+                ⭐ Rate Your Store
+            </h2>
+
+            <p>
+                Share your shopping experience with other customers.
+            </p>
+
+        </div>
+
+
+        <div class="rating-box">
+
+            <!-- Selected Store ID -->
+
+            <input
+                type="hidden"
+                id="ratingStoreId"
+            >
+
+
+            <!-- Store Name -->
+
+            <h3 id="ratingStoreName">
+
+                Select a store from the recommendation
+
+            </h3>
+
+
+            <!-- Current Rating -->
+
+            <div id="currentStoreRating">
+
+                ⭐ No ratings yet
+
+            </div>
+
+
+            <p>
+
+                Give your rating:
+
+            </p>
+
+
+            <!-- Stars -->
+
+            <div
+                class="star-rating"
+                id="starRating">
+
+                <button
+                    type="button"
+                    onclick="selectRating(1)">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="selectRating(2)">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="selectRating(3)">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="selectRating(4)">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="selectRating(5)">
+
+                    ★
+
+                </button>
+
+            </div>
+
+
+            <!-- Selected Rating -->
+
+            <p id="selectedRating">
+
+                No rating selected
+
+            </p>
+
+
+            <!-- Review -->
+
+            <textarea
+                id="storeReview"
+                rows="4"
+                placeholder="Write your review about this store..."
+            ></textarea>
+
+
+            <!-- Submit -->
+
+            <button
+                class="rating-submit-btn"
+                onclick="submitStoreRating()">
+
+                ⭐ Submit Rating
+
+            </button>
+
+
+            <!-- Message -->
+
+            <p id="ratingMessage"></p>
+            
+            <!-- Customer Reviews -->
+
+            <div id="storeReviews"></div>
+
+        </div>
+
+    </section>
 
 
     <!-- Nearby Stores -->
@@ -192,114 +354,186 @@
 
         </div>
 
+
         <div id="result"></div>
 
     </section>
+
+
+    <!-- Map -->
+
     <section id="map-section">
 
-    <div class="section-title">
+        <div class="section-title">
 
-        <h2>📍 Store Location</h2>
+            <h2>
+                📍 Store Location
+            </h2>
 
-        <p>
-            View your location and selected store on the map.
-        </p>
+            <p>
+                View your location and selected store on the map.
+            </p>
 
-    </div>
-
-    <div id="map"></div>
-
-</section>
-<!-- Login Modal -->
-
-<div id="loginModal" class="auth-modal">
-
-    <div class="auth-box">
-
-        <span class="close-btn" onclick="closeAuth()">×</span>
-
-        <h2>🔐 User Login</h2>
-
-        <p>Login to ShopNearby AI</p>
-
-        <input
-            type="email"
-            id="loginEmail"
-            placeholder="Enter your email"
-        >
-
-        <input
-            type="password"
-            id="loginPassword"
-            placeholder="Enter your password"
-        >
-
-        <button onclick="loginUser()">
-            Login
-        </button>
-
-        <p id="loginMessage"></p>
-
-        <p>
-            Don't have an account?
-            <a href="#" onclick="showRegister()">Register</a>
-        </p>
-
-    </div>
-
-</div>
+        </div>
 
 
-<!-- Register Modal -->
+        <div id="map"></div>
 
-<div id="registerModal" class="auth-modal">
+    </section>
 
-    <div class="auth-box">
 
-        <span class="close-btn" onclick="closeAuth()">×</span>
+    <!-- Login Modal -->
 
-        <h2>📝 Create Account</h2>
+    <div
+        id="loginModal"
+        class="auth-modal">
 
-        <p>Register for ShopNearby AI</p>
+        <div class="auth-box">
 
-        <input
-            type="text"
-            id="registerName"
-            placeholder="Enter your name"
-        >
+            <span
+                class="close-btn"
+                onclick="closeAuth()">
 
-        <input
-            type="email"
-            id="registerEmail"
-            placeholder="Enter your email"
-        >
+                ×
 
-        <input
-            type="text"
-            id="registerPhone"
-            placeholder="Enter your phone number"
-        >
+            </span>
 
-        <input
-            type="password"
-            id="registerPassword"
-            placeholder="Create password"
-        >
 
-        <button onclick="registerUser()">
-            Register
-        </button>
+            <h2>
+                🔐 User Login
+            </h2>
 
-        <p id="registerMessage"></p>
+            <p>
+                Login to ShopNearby AI
+            </p>
 
-        <p>
-            Already have an account?
-            <a href="#" onclick="showLogin()">Login</a>
-        </p>
+
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="Enter your email"
+            >
+
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter your password"
+            >
+
+
+            <button onclick="loginUser()">
+
+                Login
+
+            </button>
+
+
+            <p id="loginMessage"></p>
+
+
+            <p>
+
+                Don't have an account?
+
+                <a
+                    href="#"
+                    onclick="showRegister()">
+
+                    Register
+
+                </a>
+
+            </p>
+
+        </div>
 
     </div>
 
-</div>
+
+    <!-- Register Modal -->
+
+    <div
+        id="registerModal"
+        class="auth-modal">
+
+        <div class="auth-box">
+
+            <span
+                class="close-btn"
+                onclick="closeAuth()">
+
+                ×
+
+            </span>
+
+
+            <h2>
+                📝 Create Account
+            </h2>
+
+            <p>
+                Register for ShopNearby AI
+            </p>
+
+
+            <input
+                type="text"
+                id="registerName"
+                placeholder="Enter your name"
+            >
+
+
+            <input
+                type="email"
+                id="registerEmail"
+                placeholder="Enter your email"
+            >
+
+
+            <input
+                type="text"
+                id="registerPhone"
+                placeholder="Enter your phone number"
+            >
+
+
+            <input
+                type="password"
+                id="registerPassword"
+                placeholder="Create password"
+            >
+
+
+            <button onclick="registerUser()">
+
+                Register
+
+            </button>
+
+
+            <p id="registerMessage"></p>
+
+
+            <p>
+
+                Already have an account?
+
+                <a
+                    href="#"
+                    onclick="showLogin()">
+
+                    Login
+
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+
+
     <!-- Footer -->
 
     <footer>
@@ -312,11 +546,20 @@
 
     </footer>
 
-    <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Leaflet -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <!-- Main JavaScript -->
+
+    <script
+        src="{{ url_for('static', filename='script.js') }}">
+    </script>
+
 
 </body>
 

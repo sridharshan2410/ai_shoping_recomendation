@@ -273,6 +273,36 @@
                 flex-direction: column;
             }
         }
+        /* =========================================
+   LOW STOCK ALERT
+========================================= */
+
+.low-stock-alert {
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
+    padding: 15px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.low-stock-alert h3 {
+    margin-bottom: 8px;
+    color: #c2410c;
+}
+
+.low-stock-alert ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.low-stock-alert li {
+    margin-bottom: 5px;
+}
+
+.no-low-stock {
+    display: none;
+}
     </style>
 </head>
 
@@ -435,6 +465,8 @@
 
             <h2>📦 My Inventory</h2>
 
+            <div id="lowStockAlert"></div>
+
             <div class="table-container">
 
                 <table>
@@ -468,6 +500,7 @@
             </div>
 
         </div>
+
 
 
         <!-- STORE RATING -->
@@ -733,206 +766,309 @@
            LOAD INVENTORY
         ========================================= */
 
-        async function loadInventory() {
+async function loadInventory() {
 
-            const tableBody =
-                document.getElementById(
-                    "inventoryTableBody"
-                );
+    const tableBody =
+        document.getElementById("inventoryTableBody");
 
+    const lowStockAlert =
+        document.getElementById("lowStockAlert");
+
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="loading">
+                Loading inventory...
+            </td>
+        </tr>
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/vendor-inventory",
+                {
+                    credentials: "include"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "VENDOR INVENTORY:",
+            data
+        );
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
 
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="loading">
-                        Loading inventory...
+                    <td colspan="7">
+                        Unable to load inventory.
                     </td>
                 </tr>
             `;
 
+            console.error(
+                "Inventory error:",
+                data.error
+            );
 
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/vendor-inventory",
-                        {
-                            credentials: "include"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                console.log(
-                    "VENDOR INVENTORY:",
-                    data
-                );
-
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7">
-                                Unable to load inventory.
-                            </td>
-                        </tr>
-                    `;
-
-                    console.error(
-                        "Inventory error:",
-                        data.error
-                    );
-
-                    return;
-                }
-
-
-                const products =
-                    data.inventory || [];
-
-
-                if (products.length === 0) {
-
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7">
-                                No products found in inventory.
-                            </td>
-                        </tr>
-                    `;
-
-                    return;
-                }
-
-
-                tableBody.innerHTML = "";
-
-
-                products.forEach(product => {
-
-                    let statusClass =
-                        "stock-available";
-
-                    let statusText =
-                        "Available";
-
-
-                    if (product.quantity === 0) {
-
-                        statusClass =
-                            "stock-out";
-
-                        statusText =
-                            "Out of Stock";
-
-                    }
-
-                    else if (product.quantity <= 5) {
-
-                        statusClass =
-                            "stock-low";
-
-                        statusText =
-                            "Low Stock";
-                    }
-
-
-                    const row =
-                        document.createElement("tr");
-
-
-                    row.innerHTML = `
-
-                        <td>
-                            ${product.product_id}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(
-                                product.product_name
-                            )}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(
-                                product.category || "N/A"
-                            )}
-                        </td>
-
-                        <td>
-                            ₹${Number(
-                                product.price
-                            ).toFixed(2)}
-                        </td>
-
-                        <td>
-                            ${product.quantity}
-                        </td>
-
-                        <td class="${statusClass}">
-                            ${statusText}
-                        </td>
-
-                        <td>
-
-                            <div class="action-buttons">
-
-                                <button
-                                    class="btn btn-primary"
-                                    onclick="updateProduct(
-                                        ${product.product_id},
-                                        '${escapeHTML(product.product_name)}',
-                                        ${product.quantity}
-                                    )"
-                                >
-                                    Update
-                                </button>
-
-                                <button
-                                    class="btn btn-danger"
-                                    onclick="deleteProduct(
-                                        ${product.product_id}
-                                    )"
-                                >
-                                    Delete
-                                </button>
-
-                            </div>
-
-                        </td>
-                    `;
-
-
-                    tableBody.appendChild(row);
-
-                });
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "Inventory loading error:",
-                    error
-                );
-
-
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7">
-                            Error loading inventory.
-                        </td>
-                    </tr>
-                `;
-            }
+            return;
         }
 
+
+        const products =
+            data.inventory || [];
+
+
+        if (products.length === 0) {
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        No products found in inventory.
+                    </td>
+                </tr>
+            `;
+
+            if (lowStockAlert) {
+                lowStockAlert.innerHTML = "";
+            }
+
+            return;
+        }
+
+
+        /* =========================================
+           LOW STOCK PRODUCTS
+        ========================================= */
+
+        const lowStockProducts =
+            products.filter(
+                product =>
+                    Number(product.quantity) > 0 &&
+                    Number(product.quantity) <= 5
+            );
+
+
+        /* =========================================
+           DISPLAY LOW STOCK ALERT
+        ========================================= */
+
+        if (
+            lowStockAlert &&
+            lowStockProducts.length > 0
+        ) {
+
+            lowStockAlert.innerHTML = `
+
+                <div class="low-stock-alert">
+
+                    <h3>
+                        ⚠️ Low Stock Alert
+                    </h3>
+
+                    <ul>
+
+                        ${lowStockProducts.map(product => `
+
+                            <li>
+
+                                <strong>
+                                    ${escapeHTML(
+                                        product.product_name
+                                    )}
+                                </strong>
+
+                                -
+                                Only
+                                <strong>
+                                    ${product.quantity}
+                                </strong>
+                                item${Number(product.quantity) === 1 ? "" : "s"}
+                                left
+
+                            </li>
+
+                        `).join("")}
+
+                    </ul>
+
+                </div>
+
+            `;
+
+        }
+
+        else if (lowStockAlert) {
+
+            lowStockAlert.innerHTML = "";
+
+        }
+
+
+        /* =========================================
+           DISPLAY INVENTORY TABLE
+        ========================================= */
+
+        tableBody.innerHTML = "";
+
+
+        products.forEach(product => {
+
+            let statusClass =
+                "stock-available";
+
+            let statusText =
+                "Available";
+
+
+            if (
+                Number(product.quantity) === 0
+            ) {
+
+                statusClass =
+                    "stock-out";
+
+                statusText =
+                    "Out of Stock";
+
+            }
+
+            else if (
+                Number(product.quantity) <= 5
+            ) {
+
+                statusClass =
+                    "stock-low";
+
+                statusText =
+                    "Low Stock";
+
+            }
+
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${product.product_id}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(
+                        product.product_name
+                    )}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(
+                        product.category || "N/A"
+                    )}
+                </td>
+
+
+                <td>
+                    ₹${Number(
+                        product.price
+                    ).toFixed(2)}
+                </td>
+
+
+                <td>
+                    ${product.quantity}
+                </td>
+
+
+                <td class="${statusClass}">
+                    ${statusText}
+                </td>
+
+
+                <td>
+
+                    <div class="action-buttons">
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="updateProduct(
+                                ${product.product_id},
+                                '${escapeHTML(product.product_name)}',
+                                ${product.quantity},
+                                ${product.price}
+                            )"
+                        >
+                            Update
+                        </button>
+
+
+                        <button
+                            class="btn btn-danger"
+                            onclick="deleteProduct(
+                                ${product.product_id}
+                            )"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            tableBody.appendChild(row);
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Inventory loading error:",
+            error
+        );
+
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    Error loading inventory.
+                </td>
+            </tr>
+        `;
+
+        if (lowStockAlert) {
+
+            lowStockAlert.innerHTML = `
+                <div class="low-stock-alert">
+                    ⚠️ Unable to check low stock.
+                </div>
+            `;
+
+        }
+
+    }
+
+}
 
         /* =========================================
            ADD PRODUCT

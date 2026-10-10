@@ -1,5 +1,6 @@
 /* =====================================================
    SHOPNEARBY AI - CUSTOMER JAVASCRIPT
+   Full Version + Store Rating System
 ===================================================== */
 
 
@@ -10,6 +11,9 @@
 let map = null;
 let userMarker = null;
 let storeMarker = null;
+
+let selectedRating = 0;
+let selectedRatingStoreId = null;
 
 
 /* =====================================================
@@ -32,7 +36,7 @@ function escapeHTML(value) {
 
 
 /* =====================================================
-   HELPER - SESSION ERROR
+   HELPER - SESSION EXPIRED
 ===================================================== */
 
 function showSessionExpired(element) {
@@ -55,6 +59,12 @@ function showSessionExpired(element) {
             <p>
                 Please login again to continue.
             </p>
+
+            <button
+                class="view-location-btn"
+                onclick="window.location.href='/customer-login'">
+                🔑 Login Again
+            </button>
 
         </div>
     `;
@@ -159,6 +169,10 @@ function getNearbyStores(position) {
     const result =
         document.getElementById("result");
 
+    if (!locationText || !result) {
+        return;
+    }
+
     locationText.innerHTML = `
         📍 Your location:
         ${latitude.toFixed(5)},
@@ -190,7 +204,6 @@ function getNearbyStores(position) {
             credentials: "same-origin"
         }
     )
-
     .then(response => {
 
         if (response.status === 401) {
@@ -205,7 +218,6 @@ function getNearbyStores(position) {
 
         return response.json();
     })
-
     .then(stores => {
 
         console.log(
@@ -216,7 +228,6 @@ function getNearbyStores(position) {
         displayStores(stores);
 
     })
-
     .catch(error => {
 
         console.error(error);
@@ -307,6 +318,12 @@ function displayStores(stores) {
                 ? store.distance
                 : "N/A";
 
+        const rating =
+            store.rating !== undefined &&
+            store.rating !== null
+                ? Number(store.rating).toFixed(1)
+                : "No ratings";
+
         card.innerHTML = `
 
             <div class="store-icon">
@@ -324,7 +341,7 @@ function displayStores(stores) {
             <div class="store-info">
 
                 <span>
-                    ⭐ ${store.rating}
+                    ⭐ ${rating}
                 </span>
 
                 <span>
@@ -343,6 +360,19 @@ function displayStores(stores) {
                 🗺️ View Location
 
             </button>
+
+            <button
+                class="view-location-btn"
+                onclick="openStoreRating(
+            ${store.store_id},
+            '${escapeHTML(store.store_name)}',
+            ${store.rating || 0}
+            )">
+
+            ⭐ Rate This Store
+
+            </button>
+
         `;
 
         result.appendChild(card);
@@ -540,7 +570,6 @@ function searchProduct() {
             credentials: "same-origin"
         }
     )
-
     .then(response => {
 
         if (response.status === 401) {
@@ -555,7 +584,6 @@ function searchProduct() {
 
         return response.json();
     })
-
     .then(products => {
 
         console.log(
@@ -570,7 +598,6 @@ function searchProduct() {
 
             displayProducts(products);
 
-            // Get AI recommendation
             getRecommendation(productName);
 
         }
@@ -581,12 +608,10 @@ function searchProduct() {
 
             clearRecommendation();
 
-            // Automatically find alternatives
             getAlternativeStores(productName);
         }
 
     })
-
     .catch(error => {
 
         console.error(error);
@@ -677,6 +702,12 @@ function displayProducts(products) {
         card.className =
             "product-card";
 
+        const rating =
+            product.rating !== undefined &&
+            product.rating !== null
+                ? Number(product.rating).toFixed(1)
+                : "No ratings";
+
         card.innerHTML = `
 
             <div class="product-icon">
@@ -710,7 +741,7 @@ function displayProducts(products) {
                 </span>
 
                 <span>
-                    ⭐ ${product.rating}
+                    ⭐ ${rating}
                 </span>
 
             </div>
@@ -725,6 +756,7 @@ function displayProducts(products) {
                 🗺️ View Location
 
             </button>
+
         `;
 
         result.appendChild(card);
@@ -770,6 +802,9 @@ function clearRecommendation() {
 
 /* =====================================================
    AI BEST STORE RECOMMENDATION
+===================================================== */
+/* =====================================================
+   AI TOP 3 STORE RECOMMENDATION
 ===================================================== */
 
 function getRecommendation(productName) {
@@ -843,12 +878,12 @@ function getRecommendation(productName) {
                     </div>
 
                     <h3>
-                        Finding the Best Store...
+                        Finding Top 3 Stores...
                     </h3>
 
                     <p>
-                        Comparing price, rating,
-                        stock and distance.
+                        Comparing availability,
+                        distance, rating and price.
                     </p>
 
                 </div>
@@ -861,16 +896,17 @@ function getRecommendation(productName) {
                     credentials: "same-origin"
                 }
             )
-
             .then(response => {
 
                 if (response.status === 401) {
+
                     throw new Error(
                         "SESSION_EXPIRED"
                     );
                 }
 
                 if (!response.ok) {
+
                     throw new Error(
                         "Unable to get recommendation"
                     );
@@ -878,13 +914,17 @@ function getRecommendation(productName) {
 
                 return response.json();
             })
-
             .then(data => {
 
                 console.log(
-                    "AI Recommendation:",
+                    "AI Top 3 Recommendation:",
                     data
                 );
+
+
+                /* =========================================
+                   PRODUCT NOT AVAILABLE
+                ========================================= */
 
                 if (
                     data.success === false &&
@@ -903,7 +943,9 @@ function getRecommendation(productName) {
                             </h3>
 
                             <p>
-                                ${escapeHTML(data.message)}
+                                ${escapeHTML(
+                                    data.message
+                                )}
                             </p>
 
                         </div>
@@ -912,11 +954,26 @@ function getRecommendation(productName) {
                     return;
                 }
 
-                const store =
-                    data.best_store ||
-                    data.recommendation;
 
-                if (!store) {
+                /* =========================================
+                   GET TOP 3 RECOMMENDATIONS
+                ========================================= */
+
+                const recommendations =
+                    Array.isArray(
+                        data.recommendations
+                    )
+                        ? data.recommendations.slice(0, 3)
+                        : [];
+
+
+                /* =========================================
+                   NO RECOMMENDATION
+                ========================================= */
+
+                if (
+                    recommendations.length === 0
+                ) {
 
                     recommendationResult.innerHTML = `
                         <div class="empty-state">
@@ -939,120 +996,456 @@ function getRecommendation(productName) {
                     return;
                 }
 
-                const distance =
-                    store.distance !== undefined
-                        ? store.distance
-                        : "N/A";
 
-                const score =
-                    store.score !== undefined
-                        ? store.score
-                        : null;
+                /* =========================================
+                   RANK ICON
+                ========================================= */
 
-                recommendationResult.innerHTML = `
+                function getRankIcon(index) {
 
-                    <div class="recommendation-card">
+                    if (index === 0) {
+                        return "🥇";
+                    }
+
+                    if (index === 1) {
+                        return "🥈";
+                    }
+
+                    if (index === 2) {
+                        return "🥉";
+                    }
+
+                    return "🏪";
+                }
+
+
+                /* =========================================
+                   CREATE TOP 3 HEADER
+                ========================================= */
+
+                let output = `
+
+                    <div class="top-recommendation-header">
 
                         <div class="recommendation-badge">
-                            🤖 AI Recommended
+                            🤖 AI TOP ${recommendations.length}
+                            RECOMMENDATIONS
                         </div>
 
-                        <div class="recommendation-header">
+                        <h2>
+                            🏆 Best Stores For You
+                        </h2>
 
-                            <div class="recommendation-icon">
-                                🛒
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    ${escapeHTML(store.store_name)}
-                                </h3>
-
-                                <p>
-                                    📍 ${escapeHTML(store.address)}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="recommendation-product">
-
-                            <h4>
-                                ${escapeHTML(store.product_name)}
-                            </h4>
-
-                            <div class="recommendation-details">
-
-                                <span>
-                                    💰 ₹${Number(store.price).toFixed(2)}
-                                </span>
-
-                                <span>
-                                    ⭐ ${store.rating}
-                                </span>
-
-                                <span>
-                                    📦 ${store.quantity} available
-                                </span>
-
-                                <span>
-                                    📏 ${distance} km
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        ${
-                            score !== null
-                            ?
-                            `
-                            <div class="ai-score">
-
-                                <span>
-                                    AI Score
-                                </span>
-
-                                <strong>
-                                    ${score}
-                                </strong>
-
-                            </div>
-                            `
-                            :
-                            ""
-                        }
-
-                        <div class="recommendation-reason">
-
-                            <p>
-                                ✅ Recommended using
-                                price, rating, stock
-                                and distance.
-                            </p>
-
-                        </div>
-
-                        <button
-                            class="view-location-btn"
-                            onclick="viewLocation(
-                                ${store.latitude},
-                                ${store.longitude}
-                            )">
-
-                            🗺️ View Store Location
-
-                        </button>
+                        <p>
+                            Stores ranked using
+                            availability, distance,
+                            rating and price.
+                        </p>
 
                     </div>
-                `;
-            })
 
+                `;
+
+
+                /* =========================================
+                   CREATE EACH RECOMMENDATION CARD
+                ========================================= */
+
+                recommendations.forEach(
+                    (store, index) => {
+
+                        const distance =
+                            store.distance !== undefined
+                                ? Number(
+                                    store.distance
+                                ).toFixed(2)
+                                : "N/A";
+
+
+                        const price =
+                            store.price !== undefined
+                                ? Number(
+                                    store.price
+                                ).toFixed(2)
+                                : "N/A";
+
+
+                        const quantity =
+                            store.quantity !== undefined
+                                ? Number(
+                                    store.quantity
+                                )
+                                : 0;
+
+
+                        const rating =
+                            store.rating !== undefined &&
+                            store.rating !== null
+                                ? Number(
+                                    store.rating
+                                ).toFixed(1)
+                                : "No ratings";
+
+
+                        /* =================================
+                           AI SCORE VALUES
+                        ================================= */
+
+                        const availabilityScore =
+                            store.availability_score !== undefined
+                                ? Number(
+                                    store.availability_score
+                                ).toFixed(1)
+                                : "0.0";
+
+
+                        const distanceScore =
+                            store.distance_score !== undefined
+                                ? Number(
+                                    store.distance_score
+                                ).toFixed(1)
+                                : "0.0";
+
+
+                        const ratingScore =
+                            store.rating_score !== undefined
+                                ? Number(
+                                    store.rating_score
+                                ).toFixed(1)
+                                : "0.0";
+
+
+                        const priceScore =
+                            store.price_score !== undefined
+                                ? Number(
+                                    store.price_score
+                                ).toFixed(1)
+                                : "0.0";
+
+
+                        const score =
+                            store.score !== undefined
+                                ? Number(
+                                    store.score
+                                ).toFixed(2)
+                                : "N/A";
+
+
+                        /* =================================
+                           AI EXPLANATION
+                        ================================= */
+
+                        let reasons = [];
+
+
+                        if (quantity > 0) {
+
+                            reasons.push(
+                                "Product is currently available"
+                            );
+                        }
+
+
+                        if (
+                            store.rating !== undefined &&
+                            Number(store.rating) >= 4
+                        ) {
+
+                            reasons.push(
+                                "Good customer rating"
+                            );
+                        }
+
+
+                        if (
+                            store.distance !== undefined &&
+                            Number(store.distance) <= 2
+                        ) {
+
+                            reasons.push(
+                                "Very close to your location"
+                            );
+                        }
+
+
+                        if (
+                            store.price !== undefined
+                        ) {
+
+                            reasons.push(
+                                "Competitive product price"
+                            );
+                        }
+
+
+                        if (reasons.length === 0) {
+
+                            reasons.push(
+                                "Best overall combination of available factors"
+                            );
+                        }
+
+
+                        /* =================================
+                           RECOMMENDATION CARD
+                        ================================= */
+
+                        output += `
+
+                            <div class="recommendation-card">
+
+                                <!-- RANK -->
+
+                                <div class="recommendation-rank">
+
+                                    ${getRankIcon(index)}
+
+                                    <strong>
+                                        #${index + 1}
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- AI BADGE -->
+
+                                <div class="recommendation-badge">
+
+                                    ${
+                                        index === 0
+                                            ? "🤖 AI Recommended"
+                                            : "🤖 AI Recommendation"
+                                    }
+
+                                </div>
+
+
+                                <!-- STORE HEADER -->
+
+                                <div class="recommendation-header">
+
+                                    <div class="recommendation-icon">
+                                        🛒
+                                    </div>
+
+                                    <div>
+
+                                        <h3>
+                                            ${escapeHTML(
+                                                store.store_name
+                                            )}
+                                        </h3>
+
+                                        <p>
+                                            📍 ${escapeHTML(
+                                                store.address
+                                            )}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- PRODUCT INFORMATION -->
+
+                                <div class="recommendation-product">
+
+                                    <h4>
+                                        ${escapeHTML(
+                                            store.product_name
+                                        )}
+                                    </h4>
+
+                                    <div class="recommendation-details">
+
+                                        <span>
+                                            💰 ₹${price}
+                                        </span>
+
+                                        <span>
+                                            ⭐ ${rating}
+                                        </span>
+
+                                        <span>
+                                            📦 ${quantity} available
+                                        </span>
+
+                                        <span>
+                                            📏 ${distance} km
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- AI SCORE -->
+
+                                <div class="ai-score">
+
+                                    <span>
+                                        🤖 AI Score
+                                    </span>
+
+                                    <strong>
+                                        ${score}
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- SCORE BREAKDOWN -->
+
+                                <div class="recommendation-analysis">
+
+                                    <h4>
+                                        📊 Recommendation Analysis
+                                    </h4>
+
+
+                                    <div class="analysis-row">
+
+                                        <span>
+                                            📦 Availability
+                                            <small>
+                                                (35%)
+                                            </small>
+                                        </span>
+
+                                        <strong>
+                                            ${availabilityScore}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="analysis-row">
+
+                                        <span>
+                                            📏 Distance
+                                            <small>
+                                                (30%)
+                                            </small>
+                                        </span>
+
+                                        <strong>
+                                            ${distanceScore}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="analysis-row">
+
+                                        <span>
+                                            ⭐ Rating
+                                            <small>
+                                                (20%)
+                                            </small>
+                                        </span>
+
+                                        <strong>
+                                            ${ratingScore}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="analysis-row">
+
+                                        <span>
+                                            💰 Price
+                                            <small>
+                                                (15%)
+                                            </small>
+                                        </span>
+
+                                        <strong>
+                                            ${priceScore}%
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- WHY THIS STORE -->
+
+                                <div class="recommendation-reason">
+
+                                    <h4>
+                                        💡 Why this store?
+                                    </h4>
+
+                                    <ul>
+
+                                        ${reasons.map(
+                                            reason => `
+                                                <li>
+                                                    ✅ ${escapeHTML(
+                                                        reason
+                                                    )}
+                                                </li>
+                                            `
+                                        ).join("")}
+
+                                    </ul>
+
+                                </div>
+
+
+                                <!-- LOCATION BUTTON -->
+
+                                <button
+                                    class="view-location-btn"
+                                    onclick="viewLocation(
+                                        ${store.latitude},
+                                        ${store.longitude}
+                                    )">
+
+                                    🗺️ View Store Location
+
+                                </button>
+
+
+                                <!-- RATING BUTTON -->
+
+                                <button
+                                    class="view-location-btn"
+                                    onclick="openStoreRating(
+                                        ${store.store_id},
+                                        '${escapeHTML(
+                                            store.store_name
+                                        )}',
+                                        ${store.rating || 0}
+                                    )">
+
+                                    ⭐ Rate This Store
+
+                                </button>
+
+                            </div>
+
+                        `;
+                    }
+                );
+
+
+                /* =========================================
+                   DISPLAY ALL TOP 3
+                ========================================= */
+
+                recommendationResult.innerHTML =
+                    output;
+
+            })
             .catch(error => {
 
-                console.error(error);
+                console.error(
+                    error
+                );
+
 
                 if (
                     error.message ===
@@ -1065,6 +1458,7 @@ function getRecommendation(productName) {
 
                     return;
                 }
+
 
                 recommendationResult.innerHTML = `
                     <div class="empty-state">
@@ -1086,9 +1480,12 @@ function getRecommendation(productName) {
             });
         },
 
+
         function(error) {
 
-            console.error(error);
+            console.error(
+                error
+            );
 
             recommendationResult.innerHTML = `
                 <div class="empty-state">
@@ -1110,6 +1507,7 @@ function getRecommendation(productName) {
             `;
         },
 
+
         {
             enableHighAccuracy: true,
             timeout: 10000,
@@ -1117,7 +1515,6 @@ function getRecommendation(productName) {
         }
     );
 }
-
 
 /* =====================================================
    ALTERNATIVE PRODUCTS
@@ -1133,7 +1530,9 @@ function getAlternativeStores(productName) {
     }
 
     result.innerHTML += `
-        <div class="empty-state">
+        <div
+            id="alternativeLoading"
+            class="empty-state">
 
             <div class="empty-icon">
                 🔄
@@ -1157,7 +1556,6 @@ function getAlternativeStores(productName) {
             credentials: "same-origin"
         }
     )
-
     .then(response => {
 
         if (response.status === 401) {
@@ -1174,8 +1572,16 @@ function getAlternativeStores(productName) {
 
         return response.json();
     })
-
     .then(alternatives => {
+
+        const loading =
+            document.getElementById(
+                "alternativeLoading"
+            );
+
+        if (loading) {
+            loading.remove();
+        }
 
         if (
             !Array.isArray(alternatives) ||
@@ -1221,6 +1627,12 @@ function getAlternativeStores(productName) {
 
         alternatives.forEach(product => {
 
+            const rating =
+                product.rating !== undefined &&
+                product.rating !== null
+                    ? Number(product.rating).toFixed(1)
+                    : "No ratings";
+
             output += `
 
                 <div class="store-card">
@@ -1248,7 +1660,7 @@ function getAlternativeStores(productName) {
                         </span>
 
                         <span>
-                            ⭐ ${product.rating}
+                            ⭐ ${rating}
                         </span>
 
                     </div>
@@ -1280,25 +1692,20 @@ function getAlternativeStores(productName) {
             </div>
         `;
 
-        // Remove loading message
-        const loadingMessages =
-            result.querySelectorAll(
-                ".empty-state"
-            );
-
-        if (loadingMessages.length > 0) {
-
-            loadingMessages[
-                loadingMessages.length - 1
-            ].remove();
-        }
-
         result.innerHTML += output;
     })
-
     .catch(error => {
 
         console.error(error);
+
+        const loading =
+            document.getElementById(
+                "alternativeLoading"
+            );
+
+        if (loading) {
+            loading.remove();
+        }
 
         if (
             error.message ===
@@ -1327,6 +1734,527 @@ function getAlternativeStores(productName) {
 
             </div>
         `;
+    });
+}
+
+
+/* =====================================================
+   STORE RATING SYSTEM
+===================================================== */
+
+function openStoreRating(
+    storeId,
+    storeName,
+    currentRating = 0
+) {
+
+    const section =
+        document.getElementById(
+            "store-rating-section"
+        );
+
+    const storeIdInput =
+        document.getElementById(
+            "ratingStoreId"
+        );
+
+    const storeNameElement =
+        document.getElementById(
+            "ratingStoreName"
+        );
+
+    const ratingMessage =
+        document.getElementById(
+            "ratingMessage"
+        );
+
+    if (
+        !section ||
+        !storeIdInput ||
+        !storeNameElement
+    ) {
+
+        console.error(
+            "Rating section elements not found"
+        );
+
+        return;
+    }
+
+    selectedRating = 0;
+    selectedRatingStoreId = Number(storeId);
+
+    storeIdInput.value = storeId;
+
+    storeNameElement.textContent =
+        `⭐ Rate ${storeName}`;
+
+    if (ratingMessage) {
+        ratingMessage.textContent = "";
+    }
+
+    const review =
+        document.getElementById(
+            "storeReview"
+        );
+
+    if (review) {
+        review.value = "";
+    }
+
+    updateRatingStars();
+
+    loadStoreRating(storeId);
+
+    section.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+
+/* =====================================================
+   SELECT STAR RATING
+===================================================== */
+
+function selectRating(rating) {
+
+    rating = Number(rating);
+
+    if (
+        rating < 1 ||
+        rating > 5
+    ) {
+        return;
+    }
+
+    selectedRating = rating;
+
+    updateRatingStars();
+
+    const selectedRatingText =
+        document.getElementById(
+            "selectedRating"
+        );
+
+    if (selectedRatingText) {
+
+        selectedRatingText.textContent =
+            `You selected ${rating} / 5 ⭐`;
+    }
+}
+
+
+/* =====================================================
+   UPDATE STAR UI
+===================================================== */
+
+function updateRatingStars() {
+
+    const starContainer =
+        document.getElementById(
+            "starRating"
+        );
+
+    if (!starContainer) {
+        return;
+    }
+
+    const stars =
+        starContainer.querySelectorAll(
+            "button"
+        );
+
+    stars.forEach(
+        (star, index) => {
+
+            const value =
+                index + 1;
+
+            star.classList.toggle(
+                "selected",
+                value <= selectedRating
+            );
+
+            star.setAttribute(
+                "aria-label",
+                `${value} star${value > 1 ? "s" : ""}`
+            );
+        }
+    );
+
+    const selectedRatingText =
+        document.getElementById(
+            "selectedRating"
+        );
+
+    if (selectedRatingText) {
+
+        selectedRatingText.textContent =
+            selectedRating > 0
+                ? `You selected ${selectedRating} / 5 ⭐`
+                : "No rating selected";
+    }
+}
+
+
+/* =====================================================
+   LOAD STORE AVERAGE RATING
+===================================================== */
+
+async function loadStoreRating(storeId) {
+
+    try {
+
+        // =====================================================
+        // LOAD AVERAGE STORE RATING
+        // =====================================================
+
+        const ratingResponse = await fetch(
+            `/api/store-rating/${storeId}`
+        );
+
+        const ratingData = await ratingResponse.json();
+
+        const currentRating =
+            document.getElementById("currentStoreRating");
+
+        if (currentRating) {
+
+            if (
+                ratingData.success &&
+                ratingData.total_ratings > 0
+            ) {
+
+                currentRating.innerHTML = `
+                    ⭐ <strong>${ratingData.average_rating}</strong>
+                    / 5
+                    <span>
+                        (${ratingData.total_ratings} ratings)
+                    </span>
+                `;
+
+            } else {
+
+                currentRating.innerHTML = `
+                    ⭐ No ratings yet
+                `;
+            }
+        }
+
+
+        // =====================================================
+        // LOAD INDIVIDUAL CUSTOMER REVIEWS
+        // =====================================================
+
+        const reviewResponse = await fetch(
+            `/api/store-reviews/${storeId}`
+        );
+
+        const reviewData = await reviewResponse.json();
+
+        const reviewsContainer =
+            document.getElementById("storeReviews");
+
+
+        // Container not found
+        if (!reviewsContainer) {
+            return;
+        }
+
+
+        // =====================================================
+        // NO REVIEWS
+        // =====================================================
+
+        if (
+            !reviewData.success ||
+            !Array.isArray(reviewData.reviews) ||
+            reviewData.reviews.length === 0
+        ) {
+
+            reviewsContainer.innerHTML = `
+                <div class="no-reviews">
+                    <div class="no-reviews-icon">
+                        💬
+                    </div>
+
+                    <h3>No Reviews Yet</h3>
+
+                    <p>
+                        Be the first customer to review this store!
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // =====================================================
+        // DISPLAY REVIEWS
+        // =====================================================
+
+        reviewsContainer.innerHTML = `
+            
+            <div class="reviews-title">
+                <h3>💬 Customer Reviews</h3>
+
+                <span>
+                    ${reviewData.reviews.length}
+                    review${reviewData.reviews.length > 1 ? "s" : ""}
+                </span>
+            </div>
+
+            <div class="reviews-list">
+
+                ${reviewData.reviews.map(review => {
+
+                    const rating =
+                        Number(review.rating) || 0;
+
+                    const stars =
+                        "⭐".repeat(rating);
+
+                    const userName =
+                        escapeHTML(
+                            review.user_name || "Customer"
+                        );
+
+                    const reviewText =
+                        escapeHTML(
+                            review.review || "No comment provided"
+                        );
+
+                    const reviewDate =
+                        review.created_at
+                            ? escapeHTML(
+                                String(review.created_at)
+                              )
+                            : "";
+
+                    return `
+                        
+                        <div class="review-card">
+
+                            <div class="review-header">
+
+                                <div class="review-user">
+
+                                    <div class="review-avatar">
+                                        👤
+                                    </div>
+
+                                    <div>
+                                        <strong>
+                                            ${userName}
+                                        </strong>
+
+                                        ${
+                                            reviewDate
+                                                ? `
+                                                    <small>
+                                                        ${reviewDate}
+                                                    </small>
+                                                  `
+                                                : ""
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div class="review-stars">
+                                    ${stars}
+                                </div>
+
+                            </div>
+
+
+                            <div class="review-content">
+
+                                <p>
+                                    ${reviewText}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }).join("")}
+
+            </div>
+        `;
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading store rating/reviews:",
+            error
+        );
+
+        const reviewsContainer =
+            document.getElementById("storeReviews");
+
+        if (reviewsContainer) {
+
+            reviewsContainer.innerHTML = `
+                <div class="no-reviews">
+                    <p>
+                        ⚠️ Unable to load reviews.
+                    </p>
+                </div>
+            `;
+        }
+    }
+}
+/* =====================================================
+   SUBMIT STORE RATING
+===================================================== */
+
+function submitStoreRating() {
+
+    const storeIdInput =
+        document.getElementById(
+            "ratingStoreId"
+        );
+
+    const reviewInput =
+        document.getElementById(
+            "storeReview"
+        );
+
+    const ratingMessage =
+        document.getElementById(
+            "ratingMessage"
+        );
+
+    if (
+        !storeIdInput ||
+        !reviewInput ||
+        !ratingMessage
+    ) {
+
+        console.error(
+            "Rating form elements not found"
+        );
+
+        return;
+    }
+
+    const storeId =
+        Number(storeIdInput.value);
+
+    const review =
+        reviewInput.value.trim();
+
+    if (!storeId) {
+
+        ratingMessage.textContent =
+            "❌ Please select a store first.";
+
+        return;
+    }
+
+    if (
+        selectedRating < 1 ||
+        selectedRating > 5
+    ) {
+
+        ratingMessage.textContent =
+            "⚠️ Please select a rating from 1 to 5 stars.";
+
+        return;
+    }
+
+    ratingMessage.textContent =
+        "⏳ Submitting your rating...";
+
+    fetch(
+        "/api/store-rating",
+        {
+            method: "POST",
+            credentials: "same-origin",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                store_id: storeId,
+                rating: selectedRating,
+                review: review
+            })
+        }
+    )
+    .then(response => {
+
+        if (response.status === 401) {
+            throw new Error(
+                "SESSION_EXPIRED"
+            );
+        }
+
+        return response.json()
+            .then(data => ({
+                ok: response.ok,
+                data: data
+            }));
+    })
+    .then(({ ok, data }) => {
+
+        if (
+            !ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                "Unable to submit rating"
+            );
+        }
+
+        ratingMessage.textContent =
+            "✅ Your rating was submitted successfully!";
+
+        loadStoreRating(storeId);
+
+        /*
+           Reset selected rating
+           after successful submission.
+        */
+
+        selectedRating = 0;
+
+        updateRatingStars();
+
+        reviewInput.value = "";
+    })
+    .catch(error => {
+
+        console.error(
+            "Rating submit error:",
+            error
+        );
+
+        if (
+            error.message ===
+            "SESSION_EXPIRED"
+        ) {
+
+            window.location.href =
+                "/customer-login";
+
+            return;
+        }
+
+        ratingMessage.textContent =
+            `❌ ${error.message}`;
     });
 }
 
@@ -1370,7 +2298,10 @@ function viewLocation(
         });
     }
 
-    // Create map only once
+    /*
+       Create map only once.
+    */
+
     if (!map) {
 
         map =
@@ -1389,7 +2320,10 @@ function viewLocation(
         ).addTo(map);
     }
 
-    // Remove previous store marker
+    /*
+       Remove previous store marker.
+    */
+
     if (storeMarker) {
 
         map.removeLayer(
@@ -1397,7 +2331,10 @@ function viewLocation(
         );
     }
 
-    // Add selected store marker
+    /*
+       Add selected store marker.
+    */
+
     storeMarker =
         L.marker([
             lat,
@@ -1414,7 +2351,10 @@ function viewLocation(
         16
     );
 
-    // Get user location
+    /*
+       Get user current location.
+    */
+
     if (navigator.geolocation) {
 
         navigator.geolocation.getCurrentPosition(
@@ -1443,7 +2383,6 @@ function viewLocation(
                     .bindPopup(
                         "📍 Your Current Location"
                     );
-
             },
 
             function(error) {
@@ -1462,7 +2401,10 @@ function viewLocation(
         );
     }
 
-    // Leaflet resize fix
+    /*
+       Leaflet resize fix.
+    */
+
     setTimeout(
         function() {
 
@@ -1525,7 +2467,10 @@ document.addEventListener(
                 "keypress",
                 function(event) {
 
-                    if (event.key === "Enter") {
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
 
                         event.preventDefault();
 
@@ -1534,5 +2479,12 @@ document.addEventListener(
                 }
             );
         }
+
+        /*
+           Make sure rating stars
+           have correct initial state.
+        */
+
+        updateRatingStars();
     }
 );

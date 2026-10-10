@@ -1,24 +1,30 @@
 from flask import Flask, jsonify, request, render_template, session, redirect
 from functools import wraps
 import math
-from flask_cors import CORS
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from db import get_db_connection
 
 
+import secrets
+
 app = Flask(__name__)
 
-app.secret_key = "shopping_recommendation_secret_key"
+# Generate a secure random secret key at startup
+app.secret_key = secrets.token_hex(32)
 
-CORS(app)
-
+# Session Security Settings
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False  # Local HTTP development only
 
 # =========================================================
-# AUTHENTICATION DECORATORS
+# AUTHENTICATION
 # =========================================================
 
 def login_required(function):
+
     @wraps(function)
     def wrapper(*args, **kwargs):
 
@@ -33,6 +39,7 @@ def login_required(function):
 
 
 def role_required(required_role):
+
     def decorator(function):
 
         @wraps(function)
@@ -91,13 +98,9 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 # HOME PAGE
 # =========================================================
 
-# IMPORTANT:
-# Website first open pannumbodhu ALWAYS login.html varum.
-# Existing session irundhaalum dashboard-ku automatic redirect
-# aagathu.
-
 @app.route("/")
 def home():
+
     return render_template("login.html")
 
 
@@ -107,21 +110,25 @@ def home():
 
 @app.route("/customer-login")
 def customer_login_page():
+
     return render_template("customer_login.html")
 
 
 @app.route("/customer-register")
 def customer_register_page():
+
     return render_template("customer_register.html")
 
 
 @app.route("/vendor-login")
 def vendor_login_page():
+
     return render_template("vendor_login.html")
 
 
 @app.route("/vendor-register")
 def vendor_register_page():
+
     return render_template("vendor_register.html")
 
 
@@ -159,6 +166,7 @@ def vendor_dashboard():
 
 @app.route("/map")
 def map_page():
+
     return render_template("map.html")
 
 
@@ -183,6 +191,7 @@ def register():
     password = data.get("password")
 
     if not name or not email or not phone or not password:
+
         return jsonify({
             "success": False,
             "error": "All fields are required"
@@ -266,6 +275,7 @@ def register_vendor():
     data = request.get_json()
 
     if not data:
+
         return jsonify({
             "success": False,
             "error": "Invalid request"
@@ -315,8 +325,6 @@ def register_vendor():
 
     try:
 
-        # Check duplicate email
-
         cursor.execute(
             """
             SELECT user_id
@@ -336,8 +344,6 @@ def register_vendor():
             }), 409
 
         hashed_password = generate_password_hash(password)
-
-        # Create vendor user
 
         cursor.execute(
             """
@@ -361,8 +367,6 @@ def register_vendor():
         )
 
         vendor_id = cursor.lastrowid
-
-        # Create store
 
         cursor.execute(
             """
@@ -419,11 +423,11 @@ def login():
     data = request.get_json()
 
     if not data:
+
         return jsonify({
             "success": False,
             "error": "Invalid request"
-        }), 400
-
+        }), 400  
     email = data.get("email")
     password = data.get("password")
     requested_role = data.get("role")
@@ -471,8 +475,6 @@ def login():
                 "error": "Invalid email or password"
             }), 401
 
-        # Check role
-
         if user["role"] != requested_role:
 
             return jsonify({
@@ -482,8 +484,6 @@ def login():
                     f"{user['role']}"
                 )
             }), 403
-
-        # Check password
 
         if not check_password_hash(
             user["password"],
@@ -495,11 +495,7 @@ def login():
                 "error": "Invalid email or password"
             }), 401
 
-        # Clear old session
-
         session.clear()
-
-        # Create new session
 
         session["user_id"] = user["user_id"]
         session["name"] = user["name"]
@@ -588,6 +584,7 @@ def logout():
 
 # =========================================================
 # ALL STORES
+# DYNAMIC USER RATING
 # =========================================================
 
 @app.route("/stores")
@@ -601,13 +598,31 @@ def get_stores():
         cursor.execute(
             """
             SELECT
-                store_id,
-                store_name,
-                latitude,
-                longitude,
-                address,
-                rating
-            FROM stores
+                s.store_id,
+                s.store_name,
+                s.latitude,
+                s.longitude,
+                s.address,
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings
+
+            FROM stores s
             """
         )
 
@@ -623,6 +638,7 @@ def get_stores():
 
 # =========================================================
 # NEARBY STORES
+# DYNAMIC USER RATING
 # =========================================================
 
 @app.route("/nearby-stores")
@@ -633,7 +649,7 @@ def nearby_stores():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    if not lat or not lon:
+    if lat is None or lon is None:
 
         return jsonify({
             "error": "Latitude and longitude are required"
@@ -658,13 +674,31 @@ def nearby_stores():
         cursor.execute(
             """
             SELECT
-                store_id,
-                store_name,
-                latitude,
-                longitude,
-                address,
-                rating
-            FROM stores
+                s.store_id,
+                s.store_name,
+                s.latitude,
+                s.longitude,
+                s.address,
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings
+
+            FROM stores s
             """
         )
 
@@ -704,6 +738,7 @@ def nearby_stores():
 
 # =========================================================
 # PRODUCT SEARCH
+# DYNAMIC USER RATING
 # =========================================================
 
 @app.route("/search-product")
@@ -732,12 +767,31 @@ def search_product():
                 p.category,
                 p.price,
                 i.quantity,
+
                 s.store_id,
                 s.store_name,
                 s.latitude,
                 s.longitude,
                 s.address,
-                s.rating
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings
+
             FROM products p
 
             JOIN inventory i
@@ -765,6 +819,7 @@ def search_product():
 
 # =========================================================
 # ALTERNATIVE STORES
+# DYNAMIC USER RATING
 # =========================================================
 
 @app.route("/alternative-stores")
@@ -785,8 +840,6 @@ def alternative_stores():
 
     try:
 
-        # Find category
-
         cursor.execute(
             """
             SELECT category
@@ -800,6 +853,7 @@ def alternative_stores():
         product = cursor.fetchone()
 
         if not product:
+
             return jsonify([])
 
         category = product["category"]
@@ -812,12 +866,31 @@ def alternative_stores():
                 p.category,
                 p.price,
                 i.quantity,
+
                 s.store_id,
                 s.store_name,
                 s.address,
                 s.latitude,
                 s.longitude,
-                s.rating
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings
+
             FROM products p
 
             JOIN inventory i
@@ -851,6 +924,14 @@ def alternative_stores():
 
 # =========================================================
 # AI RECOMMENDATION
+#
+# AVAILABILITY = 35%
+# DISTANCE     = 30%
+# RATING       = 20%
+# PRICE        = 15%
+#
+# FINAL SCORE = 0 TO 100
+# HIGHER SCORE = BETTER RECOMMENDATION
 # =========================================================
 
 @app.route("/recommend")
@@ -862,9 +943,14 @@ def recommend():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    if not product_name or not lat or not lon:
+    # -----------------------------------------------------
+    # VALIDATE INPUT
+    # -----------------------------------------------------
+
+    if not product_name or lat is None or lon is None:
 
         return jsonify({
+            "success": False,
             "error": "Product name and location are required"
         }), 400
 
@@ -876,6 +962,7 @@ def recommend():
     except (ValueError, TypeError):
 
         return jsonify({
+            "success": False,
             "error": "Invalid location"
         }), 400
 
@@ -884,6 +971,10 @@ def recommend():
 
     try:
 
+        # -------------------------------------------------
+        # GET AVAILABLE STORES
+        # -------------------------------------------------
+
         cursor.execute(
             """
             SELECT
@@ -891,13 +982,33 @@ def recommend():
                 p.product_name,
                 p.category,
                 p.price,
+
                 i.quantity,
+
                 s.store_id,
                 s.store_name,
                 s.latitude,
                 s.longitude,
                 s.address,
-                s.rating
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings
+
             FROM products p
 
             JOIN inventory i
@@ -915,6 +1026,10 @@ def recommend():
 
         stores = cursor.fetchall()
 
+        # -------------------------------------------------
+        # PRODUCT NOT AVAILABLE
+        # -------------------------------------------------
+
         if not stores:
 
             return jsonify({
@@ -922,7 +1037,9 @@ def recommend():
                 "message": "Product not available"
             })
 
-        recommendations = []
+        # -------------------------------------------------
+        # CALCULATE DISTANCE
+        # -------------------------------------------------
 
         for store in stores:
 
@@ -933,54 +1050,407 @@ def recommend():
                 float(store["longitude"])
             )
 
-            # AI-style score
-
-            price_score = (
-                float(store["price"]) * 0.40
-            )
-
-            rating_score = (
-                5 - float(store["rating"])
-            ) * 3
-
-            stock_score = (
-                1 / max(
-                    int(store["quantity"]),
-                    1
-                )
-            ) * 20
-
-            distance_score = distance * 0.10
-
-            score = (
-                price_score
-                + rating_score
-                + stock_score
-                + distance_score
-            )
-
             store["distance"] = round(
                 distance,
                 2
             )
 
+        # -------------------------------------------------
+        # GET VALUES FOR NORMALIZATION
+        # -------------------------------------------------
+
+        prices = [
+            float(store["price"])
+            for store in stores
+        ]
+
+        distances = [
+            float(store["distance"])
+            for store in stores
+        ]
+
+        quantities = [
+            int(store["quantity"])
+            for store in stores
+        ]
+
+        min_price = min(prices)
+        max_price = max(prices)
+
+        min_distance = min(distances)
+        max_distance = max(distances)
+
+        min_quantity = min(quantities)
+        max_quantity = max(quantities)
+
+        # -------------------------------------------------
+        # CALCULATE RECOMMENDATION
+        # -------------------------------------------------
+
+        recommendations = []
+
+        for store in stores:
+
+            price = float(store["price"])
+            distance = float(store["distance"])
+            quantity = int(store["quantity"])
+            rating = float(store["rating"] or 0)
+
+            # =============================================
+            # AVAILABILITY SCORE
+            # More stock = better
+            # =============================================
+
+            if quantity > 0:
+
+                if max_quantity == min_quantity:
+
+                    availability_score = 100
+
+                else:
+
+                    availability_score = (
+                        (quantity - min_quantity)
+                        / (max_quantity - min_quantity)
+                    ) * 100
+
+            else:
+
+                availability_score = 0
+
+            # =============================================
+            # DISTANCE SCORE
+            # Less distance = better
+            # =============================================
+
+            if max_distance == min_distance:
+
+                distance_score = 100
+
+            else:
+
+                distance_score = (
+                    (max_distance - distance)
+                    / (max_distance - min_distance)
+                ) * 100
+
+            # =============================================
+            # RATING SCORE
+            # 5 STAR = 100
+            # =============================================
+
+            rating_score = (
+                rating / 5
+            ) * 100
+
+            # =============================================
+            # PRICE SCORE
+            # Lower price = better
+            # =============================================
+
+            if max_price == min_price:
+
+                price_score = 100
+
+            else:
+
+                price_score = (
+                    (max_price - price)
+                    / (max_price - min_price)
+                ) * 100
+
+            # =============================================
+            # FINAL AI SCORE
+            # =============================================
+
+            ai_score = (
+                (availability_score * 0.35)
+                + (distance_score * 0.30)
+                + (rating_score * 0.20)
+                + (price_score * 0.15)
+            )
+
+            # =============================================
+            # SAVE SCORES
+            # =============================================
+
+            store["availability_score"] = round(
+                availability_score,
+                2
+            )
+
+            store["distance_score"] = round(
+                distance_score,
+                2
+            )
+
+            store["rating_score"] = round(
+                rating_score,
+                2
+            )
+
+            store["price_score"] = round(
+                price_score,
+                2
+            )
+
             store["score"] = round(
-                score,
+                ai_score,
                 2
             )
 
             recommendations.append(store)
 
+        # -------------------------------------------------
+        # SORT
+        # HIGHEST SCORE FIRST
+        # -------------------------------------------------
+
         recommendations.sort(
-            key=lambda x: x["score"]
+            key=lambda x: x["score"],
+            reverse=True
         )
+
+        # -------------------------------------------------
+        # BEST STORE
+        # -------------------------------------------------
 
         best = recommendations[0]
 
+        # -------------------------------------------------
+        # RESPONSE
+        # -------------------------------------------------
+
+        return jsonify({
+
+            "success": True,
+
+            "best_store": best,
+
+            "recommendations": recommendations[:5],
+
+            "weights": {
+                "availability": 35,
+                "distance": 30,
+                "rating": 20,
+                "price": 15
+            }
+
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+
+        cursor.close()
+        connection.close()
+
+
+# =========================================================
+# STORE RATING
+# CUSTOMER SUBMIT / UPDATE RATING
+# =========================================================
+
+@app.route("/api/store-rating", methods=["POST"])
+@login_required
+@role_required("customer")
+def store_rating():
+
+    data = request.get_json()
+
+    if not data:
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid request"
+        }), 400
+
+    store_id = data.get("store_id")
+    rating = data.get("rating")
+    review = data.get("review", "")
+
+    if store_id is None or rating is None:
+
+        return jsonify({
+            "success": False,
+            "error": "Store ID and rating are required"
+        }), 400
+
+    try:
+
+        store_id = int(store_id)
+        rating = int(rating)
+
+    except (ValueError, TypeError):
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid store ID or rating"
+        }), 400
+
+    if rating < 1 or rating > 5:
+
+        return jsonify({
+            "success": False,
+            "error": "Rating must be between 1 and 5"
+        }), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+
+        # -------------------------------------------------
+        # CHECK STORE
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT store_id
+            FROM stores
+            WHERE store_id = %s
+            """,
+            (store_id,)
+        )
+
+        store = cursor.fetchone()
+
+        if not store:
+
+            return jsonify({
+                "success": False,
+                "error": "Store not found"
+            }), 404
+
+        user_id = session["user_id"]
+
+        # -------------------------------------------------
+        # CHECK EXISTING RATING
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT review_id
+            FROM store_reviews
+            WHERE
+                store_id = %s
+                AND user_id = %s
+            """,
+            (
+                store_id,
+                user_id
+            )
+        )
+
+        existing_review = cursor.fetchone()
+
+        if existing_review:
+
+            cursor.execute(
+                """
+                UPDATE store_reviews
+                SET
+                    rating = %s,
+                    review = %s
+                WHERE review_id = %s
+                """,
+                (
+                    rating,
+                    review,
+                    existing_review["review_id"]
+                )
+            )
+
+            message = "Rating updated successfully"
+
+        else:
+
+            cursor.execute(
+                """
+                INSERT INTO store_reviews
+                (
+                    store_id,
+                    user_id,
+                    rating,
+                    review
+                )
+                VALUES (%s, %s, %s, %s)
+                """,
+                (
+                    store_id,
+                    user_id,
+                    rating,
+                    review
+                )
+            )
+
+            message = "Rating submitted successfully"
+
+        connection.commit()
+
         return jsonify({
             "success": True,
-            "best_store": best,
-            "recommendations": recommendations[:5]
+            "message": message
+        })
+
+    except Exception as e:
+
+        connection.rollback()
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+
+        cursor.close()
+        connection.close()
+
+
+# =========================================================
+# GET STORE RATING
+# =========================================================
+
+@app.route("/api/store-rating/<int:store_id>")
+@login_required
+def get_store_rating(store_id):
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT
+                COUNT(*) AS total_ratings,
+                ROUND(AVG(rating), 2) AS average_rating
+            FROM store_reviews
+            WHERE store_id = %s
+            """,
+            (store_id,)
+        )
+
+        result = cursor.fetchone()
+
+        if not result or result["total_ratings"] == 0:
+
+            return jsonify({
+                "success": True,
+                "average_rating": None,
+                "total_ratings": 0
+            })
+
+        return jsonify({
+            "success": True,
+            "average_rating": result["average_rating"],
+            "total_ratings": result["total_ratings"]
         })
 
     finally:
@@ -990,7 +1460,58 @@ def recommend():
 
 
 # =========================================================
-# VENDOR STORE API
+# GET STORE REVIEWS
+# CUSTOMER REVIEWS DISPLAY
+# =========================================================
+
+@app.route("/api/store-reviews/<int:store_id>")
+@login_required
+def get_store_reviews(store_id):
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT
+                sr.review_id,
+                sr.rating,
+                sr.review,
+                sr.created_at,
+                u.name AS user_name
+            FROM store_reviews sr
+            JOIN users u
+                ON sr.user_id = u.user_id
+            WHERE sr.store_id = %s
+            ORDER BY sr.created_at DESC
+            """,
+            (store_id,)
+        )
+
+        reviews = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "reviews": reviews
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+
+        cursor.close()
+        connection.close()
+
+# =========================================================
+# VENDOR STORE
+# DYNAMIC RATING
 # =========================================================
 
 @app.route("/api/vendor-store")
@@ -1011,7 +1532,25 @@ def vendor_store():
                 s.latitude,
                 s.longitude,
                 s.address,
-                s.rating,
+
+                COALESCE(
+                    ROUND(
+                        (
+                            SELECT AVG(sr.rating)
+                            FROM store_reviews sr
+                            WHERE sr.store_id = s.store_id
+                        ),
+                        2
+                    ),
+                    0
+                ) AS rating,
+
+                (
+                    SELECT COUNT(*)
+                    FROM store_reviews sr2
+                    WHERE sr2.store_id = s.store_id
+                ) AS total_ratings,
+
                 u.name AS owner_name
 
             FROM stores s
@@ -1129,10 +1668,7 @@ def vendor_add_product():
 
         return jsonify({
             "success": False,
-            "error": (
-                "Product name and category "
-                "are required"
-            )
+            "error": "Product name and category are required"
         }), 400
 
     if price is None or quantity is None:
@@ -1158,10 +1694,7 @@ def vendor_add_product():
 
         return jsonify({
             "success": False,
-            "error": (
-                "Price and quantity "
-                "cannot be negative"
-            )
+            "error": "Price and quantity cannot be negative"
         }), 400
 
     connection = get_db_connection()
@@ -1169,7 +1702,9 @@ def vendor_add_product():
 
     try:
 
-        # Get vendor store
+        # -------------------------------------------------
+        # GET VENDOR STORE
+        # -------------------------------------------------
 
         cursor.execute(
             """
@@ -1192,7 +1727,9 @@ def vendor_add_product():
 
         store_id = store["store_id"]
 
-        # Check existing product
+        # -------------------------------------------------
+        # CHECK PRODUCT
+        # -------------------------------------------------
 
         cursor.execute(
             """
@@ -1246,7 +1783,9 @@ def vendor_add_product():
 
             product_id = cursor.lastrowid
 
-        # Check inventory
+        # -------------------------------------------------
+        # CHECK INVENTORY
+        # -------------------------------------------------
 
         cursor.execute(
             """
@@ -1377,18 +1916,13 @@ def vendor_update_product():
 
         return jsonify({
             "success": False,
-            "error": (
-                "Price and quantity "
-                "cannot be negative"
-            )
+            "error": "Price and quantity cannot be negative"
         }), 400
 
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
     try:
-
-        # Verify ownership
 
         cursor.execute(
             """
@@ -1417,13 +1951,12 @@ def vendor_update_product():
 
             return jsonify({
                 "success": False,
-                "error": (
-                    "Product not found "
-                    "in your store"
-                )
+                "error": "Product not found in your store"
             }), 404
 
-        # Update price
+        # -------------------------------------------------
+        # UPDATE PRICE
+        # -------------------------------------------------
 
         cursor.execute(
             """
@@ -1437,7 +1970,9 @@ def vendor_update_product():
             )
         )
 
-        # Update quantity
+        # -------------------------------------------------
+        # UPDATE QUANTITY
+        # -------------------------------------------------
 
         cursor.execute(
             """
@@ -1492,8 +2027,6 @@ def vendor_delete_product(product_id):
 
     try:
 
-        # Verify ownership
-
         cursor.execute(
             """
             SELECT
@@ -1520,15 +2053,8 @@ def vendor_delete_product(product_id):
 
             return jsonify({
                 "success": False,
-                "error": (
-                    "Product not found "
-                    "in your inventory"
-                )
+                "error": "Product not found in your inventory"
             }), 404
-
-        # Delete only inventory.
-        # Product table-la keep pannrom because
-        # other stores also use this product.
 
         cursor.execute(
             """
@@ -1542,10 +2068,7 @@ def vendor_delete_product(product_id):
 
         return jsonify({
             "success": True,
-            "message": (
-                "Product removed "
-                "from your inventory"
-            )
+            "message": "Product removed from your inventory"
         })
 
     except Exception as e:
@@ -1568,7 +2091,4 @@ def vendor_delete_product(product_id):
 # =========================================================
 
 if __name__ == "__main__":
-
-    app.run(
-        debug=True
-    )
+    app.run(debug=False)
