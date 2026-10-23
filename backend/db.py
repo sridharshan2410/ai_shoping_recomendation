@@ -1,29 +1,68 @@
+import os
 import mysql.connector
+from mysql.connector import Error
+
 
 def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Srid@54445",
-        database="shopping_recommendation"
-    )
+    """
+    Connect to MySQL using environment variables.
 
-try:
-    conn = get_db_connection()
+    Local development:
+    Configure these variables in your .env file.
 
-    print("MySQL connection successful!")
+    Production:
+    Configure the same variables in your hosting
+    provider's environment settings.
+    """
 
-    cursor = conn.cursor()
+    config = {
+        "host": os.getenv("DB_HOST", "localhost"),
+        "user": os.getenv("DB_USER", "root"),
+        "password": os.getenv("DB_PASSWORD", "Srid@54445"),
+        "database": os.getenv(
+            "DB_NAME",
+            "shopping_recommendation"
+        ),
+        "port": int(os.getenv("DB_PORT", "3306")),
+        "connection_timeout": 10,
+    }
 
-    cursor.execute("SELECT DATABASE()")
+    # Optional: Enable only if your hosted MySQL provider
+    # requires SSL and supplies the correct SSL settings.
+    ssl_ca = os.getenv("DB_SSL_CA")
 
-    result = cursor.fetchone()
+    if ssl_ca:
+        config["ssl_ca"] = ssl_ca
+        config["ssl_verify_cert"] = True
 
-    print("Database:", result[0])
+    try:
+        return mysql.connector.connect(**config)
 
-    cursor.close()
-    conn.close()
+    except Error:
+        # Don't expose database credentials or internal
+        # connection details to application users.
+        raise
 
-except Exception as e:
-    print("Database connection failed!")
-    print(e)
+
+if __name__ == "__main__":
+    try:
+        connection = get_db_connection()
+
+        if connection.is_connected():
+            print("MySQL connection successful!")
+
+            cursor = connection.cursor()
+            cursor.execute("SELECT DATABASE()")
+            result = cursor.fetchone()
+
+            print("Database:", result[0])
+
+            cursor.close()
+
+        connection.close()
+
+    except Error:
+        print(
+            "MySQL connection failed. "
+            "Check your database configuration."
+        )

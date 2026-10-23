@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from flask import Flask, jsonify, request, render_template, session, redirect
 from functools import wraps
 import math
@@ -7,12 +11,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db_connection
 
 
-import secrets
-
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
 
-# Generate a secure random secret key at startup
-app.secret_key = secrets.token_hex(32)
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY missing in .env file")
 
 # Session Security Settings
 app.config["SESSION_COOKIE_HTTPONLY"] = True
